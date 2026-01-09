@@ -3,8 +3,8 @@ import App from "./app/App.tsx";
 import "./styles/index.css";
 
 async function enableMocking() {
-  // VITE_ENABLE_MSW 환경변수가 'true'일 때만 MSW 실행
-  if (import.meta.env.VITE_ENABLE_MSW !== 'true') {
+  // 개발 환경이거나, VITE_ENABLE_MSW가 'false'가 아닐 때 실행 (기본적으로 실행)
+  if (import.meta.env.VITE_ENABLE_MSW === 'false') {
     return;
   }
 
