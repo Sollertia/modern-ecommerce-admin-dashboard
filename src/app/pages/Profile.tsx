@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Layout } from '../components/Layout';
 import { Input } from '../components/Input';
 import { Button } from '../components/Button';
 import { User, Mail, Phone, Lock } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
+import { authApi } from '../../api';
 import { toast } from 'sonner';
 
 export const Profile: React.FC = () => {
@@ -12,14 +13,50 @@ export const Profile: React.FC = () => {
   const changePassword = useAuthStore((state) => state.changePassword);
 
   const [formData, setFormData] = useState({
-    name: user?.name || '',
-    email: user?.email || '',
-    phone: user?.phone || '',
+    name: '',
+    email: '',
+    phone: '',
     currentPassword: '',
     newPassword: '',
     confirmPassword: '',
   });
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+
+  // 프로필 정보 조회
+  useEffect(() => {
+    const fetchProfile = async () => {
+      setIsLoadingProfile(true);
+      try {
+        const profileData = await authApi.getProfile();
+        setFormData({
+          name: profileData.name || '',
+          email: profileData.email || '',
+          phone: profileData.phone || '',
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: '',
+        });
+      } catch (error) {
+        toast.error('프로필 정보를 불러오는데 실패했습니다.');
+        // fallback to store user if API fails
+        if (user) {
+          setFormData({
+            name: user.name || '',
+            email: user.email || '',
+            phone: user.phone || '',
+            currentPassword: '',
+            newPassword: '',
+            confirmPassword: '',
+          });
+        }
+      } finally {
+        setIsLoadingProfile(false);
+      }
+    };
+
+    fetchProfile();
+  }, [user]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -119,6 +156,7 @@ export const Profile: React.FC = () => {
                 onChange={handleChange}
                 placeholder="이름"
                 className="flex-1"
+                disabled={isLoadingProfile}
               />
             </div>
 
@@ -131,6 +169,7 @@ export const Profile: React.FC = () => {
                 onChange={handleChange}
                 placeholder="이메일"
                 className="flex-1"
+                disabled={isLoadingProfile}
               />
             </div>
 
@@ -143,11 +182,19 @@ export const Profile: React.FC = () => {
                 onChange={handleChange}
                 placeholder="전화번호"
                 className="flex-1"
+                disabled={isLoadingProfile}
               />
             </div>
-            
-            <Button type="submit" className="w-full">
-              프로필 업데이트
+
+            <Button type="submit" className="w-full" disabled={isLoadingProfile}>
+              {isLoadingProfile ? (
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  로딩 중...
+                </div>
+              ) : (
+                '프로필 업데이트'
+              )}
             </Button>
           </form>
         </div>
@@ -167,7 +214,7 @@ export const Profile: React.FC = () => {
               onChange={handleChange}
               placeholder="현재 비밀번호를 입력하세요"
               required
-              disabled={isChangingPassword}
+              disabled={isChangingPassword || isLoadingProfile}
             />
 
             <div>
@@ -179,7 +226,7 @@ export const Profile: React.FC = () => {
                 onChange={handleChange}
                 placeholder="최소 8자 이상"
                 required
-                disabled={isChangingPassword}
+                disabled={isChangingPassword || isLoadingProfile}
               />
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 * 비밀번호는 최소 8자 이상이어야 합니다.
@@ -194,10 +241,10 @@ export const Profile: React.FC = () => {
               onChange={handleChange}
               placeholder="새 비밀번호를 다시 입력하세요"
               required
-              disabled={isChangingPassword}
+              disabled={isChangingPassword || isLoadingProfile}
             />
 
-            <Button type="submit" className="w-full" disabled={isChangingPassword}>
+            <Button type="submit" className="w-full" disabled={isChangingPassword || isLoadingProfile}>
               {isChangingPassword ? (
                 <div className="flex items-center justify-center gap-2">
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>

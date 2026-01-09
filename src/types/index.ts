@@ -87,6 +87,7 @@ export interface Review {
   productId: string;
   customerId: string;
   customer: string;
+  customerEmail: string;
   product: string;
   rating: number;
   comment: string;

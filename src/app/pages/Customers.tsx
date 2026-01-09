@@ -283,12 +283,14 @@ export const Customers: React.FC = () => {
     <Layout pageTitle="고객 관리">
       <div className="space-y-6">
         <div className="bg-white dark:bg-gray-800 rounded shadow dark:shadow-gray-900/50 p-6">
-          <div className="flex justify-between items-center mb-4">
-            <SearchInput
-              placeholder="이름 또는 이메일로 검색..."
-              onSearch={handleSearch}
-              className="w-64"
-            />
+          <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex-1 max-w-md">
+              <SearchInput
+                placeholder="이름 또는 이메일로 검색..."
+                onSearch={handleSearch}
+                className="w-full"
+              />
+            </div>
           </div>
 
           {isLoading ? (

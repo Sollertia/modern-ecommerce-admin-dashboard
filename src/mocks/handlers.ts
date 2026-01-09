@@ -473,6 +473,7 @@ for (let i = 0; i < deliveredOrders.length; i++) {
         productId: order.productId,
         customerId: order.customerId,
         customer: order.customer,
+        customerEmail: order.customerEmail || '',
         product: order.product,
         rating: rating,
         comment: comment,
@@ -581,6 +582,15 @@ export const handlers = [
     users.push(newUser);
     const { password: _, ...userWithoutPassword } = newUser;
     return HttpResponse.json({ success: true, code: API_CODES.CREATED, message: '회원가입 신청이 완료되었습니다. 관리자 승인을 기다려주세요.', data: userWithoutPassword }, { status: 201 });
+  }),
+
+  http.get('/api/users/me', ({ request }) => {
+    const auth = authenticateRequest(request);
+    if (!auth.authenticated) return HttpResponse.json({ success: false, code: auth.code!, message: auth.message! }, { status: 401 });
+    const user = users.find(u => u.id === auth.user!.userId);
+    if (!user) return HttpResponse.json({ success: false, code: API_CODES.NOT_FOUND, message: '사용자를 찾을 수 없습니다.' }, { status: 404 });
+    const { password: _, ...userWithoutPassword } = user;
+    return HttpResponse.json({ success: true, code: API_CODES.OK, data: userWithoutPassword });
   }),
 
   http.patch('/api/users/me', async ({ request }) => {
@@ -891,7 +901,25 @@ export const handlers = [
       }, { status: 404 });
     }
 
-    // 3. 재고 확인
+    // 3. 상품 상태 확인 (단종 상태)
+    if (product.status === PRODUCT_STATUS.DISCONTINUED) {
+      return HttpResponse.json({
+        success: false,
+        code: 'PRODUCT_DISCONTINUED',
+        message: '단종된 상품은 주문할 수 없습니다.'
+      }, { status: 400 });
+    }
+
+    // 4. 상품 상태 확인 (품절 상태)
+    if (product.status === PRODUCT_STATUS.SOLD_OUT) {
+      return HttpResponse.json({
+        success: false,
+        code: 'PRODUCT_SOLD_OUT',
+        message: '품절된 상품은 주문할 수 없습니다.'
+      }, { status: 400 });
+    }
+
+    // 5. 재고 확인
     const requestedQuantity = orderData.quantity || 1;
     if (product.stock < requestedQuantity) {
       return HttpResponse.json({
@@ -901,18 +929,18 @@ export const handlers = [
       }, { status: 400 });
     }
 
-    // 4. 재고 감소
+    // 6. 재고 감소
     const productIndex = products.findIndex(p => p.id === product!.id);
     products[productIndex].stock -= requestedQuantity;
 
-    // 5. 재고 상태 업데이트 (단종 상태가 아닐 때만)
+    // 7. 재고 상태 업데이트 (단종 상태가 아닐 때만)
     if (products[productIndex].status !== PRODUCT_STATUS.DISCONTINUED) {
       if (products[productIndex].stock === 0) {
         products[productIndex].status = PRODUCT_STATUS.SOLD_OUT;
       }
     }
 
-    // 6. 주문 생성
+    // 8. 주문 생성
     const today = new Date();
     const dateStr = formatDate(today).replace(/-/g, '');
     const todayOrderNos = orders.filter(o => o.orderNo.startsWith(dateStr));
@@ -947,7 +975,7 @@ export const handlers = [
     };
     orders.unshift(newOrder);
 
-    // 7. 고객 통계 업데이트 (취소된 주문 제외)
+    // 9. 고객 통계 업데이트 (취소된 주문 제외)
     const customerIndex = customers.findIndex(c => c.id === customer!.id);
     const customerOrders = orders.filter(o => o.customerId === customer!.id && o.status !== ORDER_STATUS.CANCELLED);
     customers[customerIndex].totalOrders = customerOrders.length;
@@ -965,6 +993,16 @@ export const handlers = [
     if (orderIndex === -1) return HttpResponse.json({ success: false, code: API_CODES.NOT_FOUND, message: '주문을 찾을 수 없습니다.' }, { status: 404 });
 
     const previousOrder = { ...orders[orderIndex] };
+
+    // 주문 취소는 준비중 상태에서만 허용
+    if (status === ORDER_STATUS.CANCELLED && previousOrder.status !== ORDER_STATUS.PREPARING) {
+      return HttpResponse.json({
+        success: false,
+        code: 'INVALID_STATUS_CHANGE',
+        message: '주문 취소는 준비중 상태에서만 가능합니다.'
+      }, { status: 400 });
+    }
+
     orders[orderIndex] = { ...orders[orderIndex], status, ...(cancellationReason && { cancellationReason }) };
 
     // 주문이 취소(CANCELLED)로 변경되었고, 이전에 취소 상태가 아니었다면 재고 복구
@@ -1132,6 +1170,16 @@ export const handlers = [
     return HttpResponse.json({ success: true, code: API_CODES.OK, data: excludePassword(customers[customerIndex]) });
   }),
 
+  http.patch('/api/customers/:id/status', async ({ request, params }) => {
+    const auth = authenticateRequest(request);
+    if (!auth.authenticated) return HttpResponse.json({ success: false, code: auth.code!, message: auth.message! }, { status: 401 });
+    const { status } = await request.json() as { status: string };
+    const customerIndex = customers.findIndex(c => c.id === params.id);
+    if (customerIndex === -1) return HttpResponse.json({ success: false, code: API_CODES.NOT_FOUND, message: '고객을 찾을 수 없습니다.' }, { status: 404 });
+    customers[customerIndex] = { ...customers[customerIndex], status };
+    return HttpResponse.json({ success: true, code: API_CODES.OK, message: '고객 상태가 업데이트되었습니다.', data: excludePassword(customers[customerIndex]) });
+  }),
+
   http.delete('/api/customers/:id', ({ request, params }) => {
     const auth = authenticateRequest(request);
     if (!auth.authenticated) return HttpResponse.json({ success: false, code: auth.code!, message: auth.message! }, { status: 401 });
@@ -1181,14 +1229,14 @@ export const handlers = [
       activeCustomers: customers.filter(c => c.status === CUSTOMER_STATUS.ACTIVE).length,
       totalProducts: products.length,
       lowStockProducts: products.filter(p => p.stock > 0 && p.stock <= 5).length,
-      totalOrders: orders.length,
-      todayOrders: orders.filter(o => o.date === today).length,
+      totalOrders: orders.filter(o => o.status !== ORDER_STATUS.CANCELLED).length,
+      todayOrders: orders.filter(o => o.date === today && o.status !== ORDER_STATUS.CANCELLED).length,
       totalReviews: reviews.length,
       averageRating: reviews.length > 0 ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1) : '0.0',
     };
     const widgets = {
-      totalRevenue: orders.reduce((sum, order) => sum + parseAmount(order.amount), 0),
-      todayRevenue: orders.filter(o => o.date === today).reduce((sum, order) => sum + parseAmount(order.amount), 0),
+      totalRevenue: orders.filter(o => o.status !== ORDER_STATUS.CANCELLED).reduce((sum, order) => sum + parseAmount(order.amount), 0),
+      todayRevenue: orders.filter(o => o.date === today && o.status !== ORDER_STATUS.CANCELLED).reduce((sum, order) => sum + parseAmount(order.amount), 0),
       preparingOrders: orders.filter(o => o.status === ORDER_STATUS.PREPARING).length,
       shippingOrders: orders.filter(o => o.status === ORDER_STATUS.SHIPPING).length,
       completedOrders: orders.filter(o => o.status === ORDER_STATUS.DELIVERED).length,

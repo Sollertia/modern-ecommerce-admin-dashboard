@@ -17,7 +17,7 @@ import type { Column, Review } from '../../types';
 
 const columns: Column[] = [
   { key: 'orderId', label: '주문번호', sortable: true },
-  { key: 'customer', label: '고객', sortable: true },
+  { key: 'customer', label: '고객명', sortable: true },
   { key: 'product', label: '상품명', sortable: true },
   { key: 'rating', label: '평점', sortable: true },
   { key: 'comment', label: '리뷰 내용', sortable: false },
@@ -146,7 +146,7 @@ export const Reviews: React.FC = () => {
           <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex-1 max-w-md">
               <SearchInput
-                placeholder="고객 또는 상품명으로 검색..."
+                placeholder="고객명 또는 상품명으로 검색..."
                 onSearch={handleSearch}
                 className="w-full"
               />
@@ -213,7 +213,7 @@ export const Reviews: React.FC = () => {
         cancelText="취소"
         variant="danger"
       >
-        <p className="dark:text-gray-300">정말로 <strong>{selectedItem?.user}</strong>님의 리뷰를 삭제하시겠습니까?</p>
+        <p className="dark:text-gray-300">정말로 <strong>{selectedItem?.customer}</strong>님의 리뷰를 삭제하시겠습니까?</p>
         <p className="text-gray-600 dark:text-gray-400 mt-2">이 작업은 되돌릴 수 없습니다.</p>
       </Modal>
 
@@ -241,13 +241,17 @@ export const Reviews: React.FC = () => {
               </div>
             </div>
 
-            {/* 리뷰 작성자 */}
+            {/* 고객 정보 */}
             <div className="border-b border-gray-200 dark:border-gray-700 pb-4">
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">작성자 정보</h3>
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">고객 정보</h3>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">작성자</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">고객명</p>
                   <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{viewingReview.customer}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">고객 이메일</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{viewingReview.customerEmail}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">작성일</p>

@@ -367,6 +367,14 @@ export const reviewsApi = {
 
 // Auth API
 export const authApi = {
+  getProfile: async (): Promise<User> => {
+    const response = await fetch(`${API_BASE_URL}/users/me`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+    return handleResponse<User>(response);
+  },
+
   updateProfile: async (data: { name: string; email: string; phone: string }) => {
     const response = await fetch(`${API_BASE_URL}/users/me`, {
       method: 'PATCH',

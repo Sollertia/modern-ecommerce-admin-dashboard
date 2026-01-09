@@ -2,6 +2,11 @@ import { create } from 'zustand';
 import type { User, Customer, Product, Order, Review } from '../types';
 import { usersApi, customersApi, productsApi, ordersApi, reviewsApi, QueryParams } from '../api';
 
+// 대시보드 갱신 이벤트 발생 헬퍼 함수
+const notifyDashboardUpdate = () => {
+  window.dispatchEvent(new CustomEvent('dashboard-update'));
+};
+
 interface PaginationState {
   page: number;
   limit: number;
@@ -199,6 +204,7 @@ export const useDataStore = create<DataState>((set) => ({
         users: state.users.filter((user) => user.id !== id),
         isLoading: false,
       }));
+      notifyDashboardUpdate();
     } catch (error) {
       set({ error: (error as Error).message, isLoading: false });
       throw error;
@@ -274,6 +280,7 @@ export const useDataStore = create<DataState>((set) => ({
         ),
         isLoading: false,
       }));
+      notifyDashboardUpdate();
     } catch (error) {
       set({ error: (error as Error).message, isLoading: false });
       throw error;
@@ -288,6 +295,7 @@ export const useDataStore = create<DataState>((set) => ({
         customers: state.customers.filter((customer) => customer.id !== id),
         isLoading: false,
       }));
+      notifyDashboardUpdate();
     } catch (error) {
       set({ isLoading: false });
       throw error;
@@ -335,6 +343,7 @@ export const useDataStore = create<DataState>((set) => ({
         ),
         isLoading: false,
       }));
+      notifyDashboardUpdate();
     } catch (error) {
       set({ error: (error as Error).message, isLoading: false });
       throw error;
@@ -351,6 +360,7 @@ export const useDataStore = create<DataState>((set) => ({
         ),
         isLoading: false,
       }));
+      notifyDashboardUpdate();
     } catch (error) {
       set({ error: (error as Error).message, isLoading: false });
       throw error;
@@ -365,6 +375,7 @@ export const useDataStore = create<DataState>((set) => ({
         products: state.products.filter((product) => product.id !== id),
         isLoading: false,
       }));
+      notifyDashboardUpdate();
     } catch (error) {
       set({ isLoading: false });
       throw error;
@@ -396,6 +407,7 @@ export const useDataStore = create<DataState>((set) => ({
         ),
         isLoading: false,
       }));
+      notifyDashboardUpdate();
     } catch (error) {
       set({ error: (error as Error).message, isLoading: false });
       throw error;
@@ -410,6 +422,7 @@ export const useDataStore = create<DataState>((set) => ({
         orders: state.orders.filter((order) => order.id !== id),
         isLoading: false,
       }));
+      notifyDashboardUpdate();
     } catch (error) {
       set({ error: (error as Error).message, isLoading: false });
       throw error;
@@ -455,6 +468,7 @@ export const useDataStore = create<DataState>((set) => ({
         reviews: state.reviews.filter((review) => review.id !== id),
         isLoading: false,
       }));
+      notifyDashboardUpdate();
     } catch (error) {
       set({ error: (error as Error).message, isLoading: false });
       throw error;

@@ -130,6 +130,17 @@ export const Dashboard: React.FC = () => {
     };
 
     loadDashboardStats();
+
+    // 데이터 변경 이벤트 리스너 등록
+    const handleDashboardUpdate = () => {
+      loadDashboardStats();
+    };
+
+    window.addEventListener('dashboard-update', handleDashboardUpdate);
+
+    return () => {
+      window.removeEventListener('dashboard-update', handleDashboardUpdate);
+    };
   }, []);
 
   // 위젯 순서가 변경될 때 localStorage에 저장

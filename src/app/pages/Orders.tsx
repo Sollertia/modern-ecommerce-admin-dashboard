@@ -212,8 +212,16 @@ export const Orders: React.FC = () => {
         setTimeout(() => {
           fetchProducts({ limit: 1000 });
         }, 100);
-      } catch (error) {
-        toast.error('주문 취소에 실패했습니다.');
+      } catch (error: any) {
+        const errorMessage = error?.message || '주문 취소에 실패했습니다.';
+        toast.error(errorMessage);
+        // 에러 발생 시 모달 닫기
+        closeDeleteModal();
+        setCancellationReason('');
+        // 에러 상태 초기화를 위해 주문 목록 다시 로드
+        setTimeout(() => {
+          loadOrders();
+        }, 100);
       }
     }
   };
@@ -380,6 +388,14 @@ export const Orders: React.FC = () => {
       // 에러 메시지에서 상세 정보 추출
       const errorMessage = error?.message || '주문 생성에 실패했습니다.';
       toast.error(errorMessage);
+
+      // 단종이나 품절 상태 에러인 경우 모달을 닫지 않고 사용자가 다른 상품을 선택할 수 있도록 함
+      // 다른 에러의 경우에도 모달을 유지하여 재시도 가능
+
+      // 에러 발생 시 주문 목록을 다시 로드하여 error 상태 초기화
+      setTimeout(() => {
+        loadOrders();
+      }, 100);
     }
   };
 
@@ -424,6 +440,10 @@ export const Orders: React.FC = () => {
               toast.error('배송완료된 주문은 취소할 수 없습니다.');
               return;
             }
+            if (order.status === ORDER_STATUS.SHIPPING) {
+              toast.error('배송중인 주문은 취소할 수 없습니다.');
+              return;
+            }
             if (order.status === ORDER_STATUS.CANCELLED) {
               toast.error('이미 취소된 주문입니다.');
               return;
@@ -432,11 +452,11 @@ export const Orders: React.FC = () => {
             setCancellationReason('');
           }}
           className={`p-2 rounded-lg transition-all duration-200 hover:scale-110 ${
-            order.status === ORDER_STATUS.DELIVERED || order.status === ORDER_STATUS.CANCELLED
+            order.status === ORDER_STATUS.DELIVERED || order.status === ORDER_STATUS.SHIPPING || order.status === ORDER_STATUS.CANCELLED
               ? 'text-gray-400 cursor-not-allowed hover:bg-transparent hover:scale-100'
               : 'text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20'
           }`}
-          title="삭제"
+          title={order.status === ORDER_STATUS.PREPARING ? '주문 취소' : '취소 불가'}
         >
           <Trash2 size={18} />
         </button>
