@@ -15,14 +15,15 @@ async function enableMocking() {
       url: '/mockServiceWorker.js',
     },
     onUnhandledRequest: 'bypass',
+    quiet: true,
   }).then(() => {
-    console.log('🔶 MSW started successfully');
+    // console.log('🔶 MSW started successfully');
   }).catch((error) => {
-    console.error('❌ MSW failed to start:', error);
+    // console.error('❌ MSW failed to start:', error);
   });
 }
 
 enableMocking().then(() => {
-  console.log('🚀 Starting app...');
+  // console.log('🚀 Starting app...');
   createRoot(document.getElementById("root")!).render(<App />);
 });
