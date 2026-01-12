@@ -91,10 +91,8 @@ export const Register: React.FC = () => {
 
     try {
       await register({ ...formData, requestMessage });
-      toast.success('관리자 계정 신청이 완료되었습니다!', {
-        onAutoClose: () => toast.info('승인 후 로그인이 가능합니다.')
-      });
-      setTimeout(() => navigate('/login'), 2000);
+      toast.success('관리자 계정 신청이 완료되었습니다! 승인 후 로그인이 가능합니다.');
+      navigate('/login');
     } catch (err) {
       const errorMsg = '회원가입에 실패했습니다. 다시 시도해주세요.';
       setError(errorMsg);
