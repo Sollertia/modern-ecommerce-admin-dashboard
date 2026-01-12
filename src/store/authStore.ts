@@ -9,7 +9,7 @@ interface AuthState {
   isAuthenticated: boolean;
   login: (credentials: LoginCredentials) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   updateProfile: (data: { name: string; email: string; phone: string }) => Promise<void>;
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
 }
@@ -77,12 +77,19 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      logout: () => {
-        set({
-          user: null,
-          token: null,
-          isAuthenticated: false,
-        });
+      logout: async () => {
+        try {
+          await authApi.logout();
+        } catch (error) {
+          console.error('Logout API error:', error);
+          // API 실패해도 로컬 상태는 초기화
+        } finally {
+          set({
+            user: null,
+            token: null,
+            isAuthenticated: false,
+          });
+        }
       },
 
       updateProfile: async (data: { name: string; email: string; phone: string }) => {

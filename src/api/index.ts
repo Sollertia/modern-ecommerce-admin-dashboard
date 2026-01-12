@@ -392,6 +392,14 @@ export const authApi = {
     });
     return handleResponse<void>(response);
   },
+
+  logout: async (): Promise<void> => {
+    const response = await fetch(`${API_BASE_URL}/auth/logout`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+    });
+    return handleResponse<void>(response);
+  },
 };
 
 // Dashboard API

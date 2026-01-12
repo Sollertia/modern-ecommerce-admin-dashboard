@@ -33,8 +33,8 @@ export const Header: React.FC<HeaderProps> = ({ pageTitle }) => {
     };
   }, [isDropdownOpen]);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate('/login');
   };
 

@@ -590,6 +590,14 @@ export const handlers = [
     return HttpResponse.json({ success: true, code: API_CODES.CREATED, message: '회원가입 신청이 완료되었습니다. 관리자 승인을 기다려주세요.', data: userWithoutPassword }, { status: 201 });
   }),
 
+  http.post('/api/auth/logout', ({ request }) => {
+    const auth = authenticateRequest(request);
+    if (!auth.authenticated) return HttpResponse.json({ success: false, code: auth.code!, message: auth.message! }, { status: 401 });
+    // Mock 환경에서는 서버 측 세션이 없으므로 성공 응답만 반환
+    // 실제 백엔드에서는 세션 삭제, 토큰 블랙리스트 추가 등 처리
+    return HttpResponse.json({ success: true, code: API_CODES.OK, message: '로그아웃되었습니다.' });
+  }),
+
   http.get('/api/users/me', ({ request }) => {
     const auth = authenticateRequest(request);
     if (!auth.authenticated) return HttpResponse.json({ success: false, code: auth.code!, message: auth.message! }, { status: 401 });
