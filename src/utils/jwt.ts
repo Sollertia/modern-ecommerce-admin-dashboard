@@ -8,6 +8,7 @@ import type { UserRole } from '../types';
 
 interface JWTPayload {
   userId: string;
+  name: string;
   email: string;
   role: UserRole;
   iat: number;  // issued at
@@ -48,9 +49,10 @@ const decode = (str: string): any => {
  * Mock JWT 토큰 생성
  * 실제로는 서버에서 비밀키로 서명된 JWT를 생성해야 합니다.
  */
-export const generateMockToken = (userId: string, email: string, role: UserRole): string => {
+export const generateMockToken = (userId: string, name: string, email: string, role: UserRole): string => {
   const payload: JWTPayload = {
     userId,
+    name,
     email,
     role,
     iat: Date.now(),

@@ -56,6 +56,9 @@ export interface Product {
   status: ProductStatus;
   image?: string;
   createdAt: string;
+  createdBy?: string; // 등록 관리자 ID
+  createdByName?: string; // 등록 관리자명
+  createdByEmail?: string; // 등록 관리자 이메일
   reviewSummary?: ReviewSummary;
   recentReviews?: Review[];
 }

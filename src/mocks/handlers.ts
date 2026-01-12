@@ -205,7 +205,13 @@ let products: Product[] = [
   { id: 'P098', name: '슬라임 세트', category: PRODUCT_CATEGORIES.TOYS, price: '19,000원', stock: 60, status: PRODUCT_STATUS.AVAILABLE },
   { id: 'P099', name: '미니카 트랙', category: PRODUCT_CATEGORIES.TOYS, price: '75,000원', stock: 25, status: PRODUCT_STATUS.AVAILABLE },
   { id: 'P100', name: '인형의 집', category: PRODUCT_CATEGORIES.TOYS, price: '150,000원', stock: 0, status: PRODUCT_STATUS.SOLD_OUT },
-].map(p => ({ ...p, createdAt: '' }));
+].map((p, index) => ({
+  ...p,
+  createdAt: '',
+  createdBy: index % 2 === 0 ? '0' : '1', // SUPER_ADMIN과 OPERATION_ADMIN 교대로
+  createdByName: index % 2 === 0 ? 'admin' : '김운영',
+  createdByEmail: index % 2 === 0 ? 'admin@sparta.com' : 'operation@sparta.com'
+}));
 
 let orders: Order[] = [];
 let reviews: Review[] = [];
@@ -570,7 +576,7 @@ export const handlers = [
     if (user.status === USER_STATUS.SUSPENDED) return HttpResponse.json({ success: false, code: API_CODES.ACCOUNT_SUSPENDED, message: API_MESSAGES[API_CODES.ACCOUNT_SUSPENDED] }, { status: 403 });
     if (user.status === USER_STATUS.INACTIVE) return HttpResponse.json({ success: false, code: API_CODES.ACCOUNT_INACTIVE, message: API_MESSAGES[API_CODES.ACCOUNT_INACTIVE] }, { status: 403 });
     // user.lastLoginAt = formatDate(new Date()); // lastLoginAt 제거
-    const token = generateMockToken(user.id, user.email, user.role);
+    const token = generateMockToken(user.id, user.name, user.email, user.role);
     const { password: _, ...userWithoutPassword } = user;
     return HttpResponse.json({ success: true, code: API_CODES.OK, data: { user: userWithoutPassword, token } });
   }),
@@ -768,8 +774,20 @@ export const handlers = [
   http.post('/api/products', async ({ request }) => {
     const auth = authenticateRequest(request);
     if (!auth.authenticated || (auth.user!.role !== ROLES.SUPER_ADMIN && auth.user!.role !== ROLES.OPERATION_ADMIN)) return HttpResponse.json({ success: false, code: API_CODES.FORBIDDEN, message: API_MESSAGES[API_CODES.FORBIDDEN] }, { status: 403 });
-    const productData = await request.json() as Omit<Product, 'id'>;
-    const newProduct: Product = { ...productData, id: `P${String(products.length + 1).padStart(3, '0')}`, createdAt: formatDate(new Date()) };
+    const requestData = await request.json();
+    const newProduct: Product = {
+      name: requestData.name,
+      category: requestData.category,
+      price: requestData.price,
+      stock: requestData.stock,
+      status: requestData.status,
+      image: requestData.image,
+      id: `P${String(products.length + 1).padStart(3, '0')}`,
+      createdAt: formatDate(new Date()),
+      createdBy: auth.user!.userId,
+      createdByName: auth.user!.name,
+      createdByEmail: auth.user!.email
+    };
     products.unshift(newProduct);
     return HttpResponse.json({ success: true, code: API_CODES.CREATED, data: newProduct }, { status: 201 });
   }),

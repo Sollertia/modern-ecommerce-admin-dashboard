@@ -25,6 +25,7 @@ const columns: Column[] = [
   { key: 'stock', label: '재고', sortable: true },
   { key: 'status', label: '상태', sortable: true },
   { key: 'createdAt', label: '등록일', sortable: true },
+  { key: 'createdByName', label: '등록 관리자', sortable: true },
 ];
 
 const statusFilterOptions = [
@@ -320,8 +321,7 @@ export const Products: React.FC = () => {
     try {
       await addProduct({
         ...addFormData,
-        status,
-        createdAt: new Date().toISOString().split('T')[0]
+        status
       });
       toast.success(`${addFormData.name} 상품이 추가되었습니다.`);
       
@@ -791,7 +791,7 @@ export const Products: React.FC = () => {
             </div>
           </div>
         ) : viewingProduct && (
-          <div className="space-y-6">
+          <div className="space-y-6 max-h-[70vh] overflow-y-auto pr-2">
             {/* 상품 이미지 */}
             {viewingProduct.image && (
               <div className="w-full h-48 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
@@ -871,6 +871,27 @@ export const Products: React.FC = () => {
               )}
             </div>
 
+            {/* 등록 정보 */}
+            <div className="border-b border-gray-200 dark:border-gray-700 pb-4">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">등록 정보</h3>
+              <div className="space-y-3">
+                <div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">등록일</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{ensureDateFormat(viewingProduct.createdAt)}</p>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">등록 관리자</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{viewingProduct.createdByName || '-'}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">이메일</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{viewingProduct.createdByEmail || '-'}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* 리뷰 섹션 */}
             <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
@@ -879,7 +900,7 @@ export const Products: React.FC = () => {
               </h3>
 
               {viewingProduct.reviewSummary && viewingProduct.reviewSummary.totalReviews > 0 ? (
-                <div className="max-h-96 overflow-y-auto pr-2">
+                <div>
                   {/* 리뷰 요약 */}
                   <div className="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 p-6 rounded-lg border border-yellow-200 dark:border-yellow-800 mb-4">
                     <div className="flex flex-col md:flex-row items-start md:items-center gap-6">

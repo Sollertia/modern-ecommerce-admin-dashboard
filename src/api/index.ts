@@ -232,7 +232,7 @@ export const productsApi = {
     return handleResponse<Product>(response);
   },
 
-  create: async (product: Omit<Product, 'id'>): Promise<Product> => {
+  create: async (product: Omit<Product, 'id' | 'createdAt' | 'createdBy' | 'createdByName' | 'createdByEmail' | 'reviewSummary' | 'recentReviews'>): Promise<Product> => {
     const response = await fetch(`${API_BASE_URL}/products`, {
       method: 'POST',
       headers: getAuthHeaders(true),
