@@ -825,7 +825,7 @@ export const Products: React.FC = () => {
             </div>
 
             {/* 재고 및 판매 상태 */}
-            <div className="pb-4">
+            <div className="border-b border-gray-200 dark:border-gray-700 pb-4">
               <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">재고 및 판매 상태</h3>
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -872,7 +872,7 @@ export const Products: React.FC = () => {
             </div>
 
             {/* 등록 정보 */}
-            <div className="border-b border-gray-200 dark:border-gray-700 pb-4">
+            <div className="pb-4">
               <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">등록 정보</h3>
               <div className="space-y-3">
                 <div>
