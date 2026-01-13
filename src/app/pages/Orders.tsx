@@ -217,9 +217,6 @@ export const Orders: React.FC = () => {
 
         // 주문 목록과 상품 목록 새로고침
         loadOrders();
-        setTimeout(() => {
-          fetchProducts({ limit: 1000 });
-        }, 100);
       } catch (error: any) {
         const errorMessage = error?.message || '주문 취소에 실패했습니다.';
         toast.error(errorMessage);
@@ -264,8 +261,8 @@ export const Orders: React.FC = () => {
       return;
     }
     // 주문 생성 시 전체 상품 및 고객 목록 조회 (페이징 없이)
-    fetchProducts({ limit: 1000 }); // 전체 상품 가져오기
-    fetchCustomers({ limit: 1000 }); // 전체 고객 가져오기
+    fetchProducts({ limit: 20 });
+    fetchCustomers({ limit: 10 });
     setCreateFormData({
       customerId: '',
       customer: '',
@@ -385,8 +382,6 @@ export const Orders: React.FC = () => {
       // 정렬을 유지하면서 데이터 다시 불러오기
       setTimeout(() => {
         loadOrders();
-        // 상품 목록도 새로고침 (재고 변경 반영)
-        fetchProducts({ limit: 1000 });
       }, 100);
     } catch (error: any) {
       // 에러 메시지에서 상세 정보 추출
