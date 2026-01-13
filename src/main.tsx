@@ -18,8 +18,25 @@ async function enableMocking() {
     quiet: true,
   }).then(() => {
     // console.log('🔶 MSW started successfully');
+
+    // Service Worker 상태 모니터링
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.ready.then((registration) => {
+        // Service Worker 상태 변경 감지
+        registration.addEventListener('updatefound', () => {
+          console.warn('⚠️ MSW Service Worker 업데이트 감지');
+        });
+
+        // 주기적으로 Service Worker 활성 상태 확인
+        setInterval(() => {
+          if (!registration.active) {
+            console.error('❌ MSW Service Worker가 비활성화되었습니다. 페이지를 새로고침해주세요.');
+          }
+        }, 30000); // 30초마다 확인
+      });
+    }
   }).catch((error) => {
-    // console.error('❌ MSW failed to start:', error);
+    console.error('❌ MSW failed to start:', error);
   });
 }
 

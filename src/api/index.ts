@@ -41,6 +41,17 @@ function getAuthHeaders(includeContentType = false): HeadersInit {
 }
 
 /**
+ * 기본 fetch 옵션 생성 (캐시 제어 포함)
+ */
+function getFetchOptions(method: string = 'GET', includeContentType = false): RequestInit {
+  return {
+    method,
+    headers: getAuthHeaders(includeContentType),
+    cache: 'no-store', // 브라우저 캐싱 방지
+  };
+}
+
+/**
  * 쿼리 파라미터를 URL에 추가하는 헬퍼 함수
  */
 function buildQueryString(params?: QueryParams): string {
@@ -56,6 +67,28 @@ function buildQueryString(params?: QueryParams): string {
 
   const queryString = searchParams.toString();
   return queryString ? `?${queryString}` : '';
+}
+
+/**
+ * 캐시 제어가 적용된 fetch 래퍼
+ */
+async function apiFetch(url: string, options: RequestInit = {}): Promise<Response> {
+  // 기본 옵션과 사용자 옵션 병합
+  const defaultOptions: RequestInit = {
+    cache: 'no-store', // 브라우저 캐싱 방지
+    headers: getAuthHeaders(options.method === 'POST' || options.method === 'PUT' || options.method === 'PATCH'),
+  };
+
+  const mergedOptions: RequestInit = {
+    ...defaultOptions,
+    ...options,
+    headers: {
+      ...defaultOptions.headers,
+      ...options.headers,
+    },
+  };
+
+  return fetch(url, mergedOptions);
 }
 
 async function handleResponse<T>(response: Response): Promise<T> {
@@ -86,76 +119,65 @@ async function handleResponse<T>(response: Response): Promise<T> {
 export const usersApi = {
   getAll: async (params?: QueryParams): Promise<PaginatedData<User>> => {
     const queryString = buildQueryString(params);
-    const response = await fetch(`${API_BASE_URL}/users${queryString}`, {
-      headers: getAuthHeaders(),
-    });
+    const response = await apiFetch(`${API_BASE_URL}/users${queryString}`);
     return handleResponse<PaginatedData<User>>(response);
   },
 
   getById: async (id: string): Promise<User> => {
-    const response = await fetch(`${API_BASE_URL}/users/${id}`, {
-      headers: getAuthHeaders(),
-    });
+    const response = await apiFetch(`${API_BASE_URL}/users/${id}`);
     return handleResponse<User>(response);
   },
 
   create: async (user: Omit<User, 'id'>): Promise<User> => {
-    const response = await fetch(`${API_BASE_URL}/users`, {
+    const response = await apiFetch(`${API_BASE_URL}/users`, {
       method: 'POST',
-      headers: getAuthHeaders(true),
       body: JSON.stringify(user),
     });
     return handleResponse<User>(response);
   },
 
   update: async (id: string, user: Pick<User, 'name' | 'email' | 'phone'>): Promise<User> => {
-    const response = await fetch(`${API_BASE_URL}/users/${id}`, {
+    const response = await apiFetch(`${API_BASE_URL}/users/${id}`, {
       method: 'PUT',
-      headers: getAuthHeaders(true),
       body: JSON.stringify(user),
     });
     return handleResponse<User>(response);
   },
 
   updateRole: async (id: string, role: string): Promise<User> => {
-    const response = await fetch(`${API_BASE_URL}/users/${id}/role`, {
+    const response = await apiFetch(`${API_BASE_URL}/users/${id}/role`, {
       method: 'PATCH',
-      headers: getAuthHeaders(true),
       body: JSON.stringify({ role }),
     });
     return handleResponse<User>(response);
   },
 
   updateStatus: async (id: string, status: string): Promise<User> => {
-    const response = await fetch(`${API_BASE_URL}/users/${id}/status`, {
+    const response = await apiFetch(`${API_BASE_URL}/users/${id}/status`, {
       method: 'PATCH',
-      headers: getAuthHeaders(true),
       body: JSON.stringify({ status }),
     });
     return handleResponse<User>(response);
   },
 
   delete: async (id: string): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/users/${id}`, {
+    const response = await apiFetch(`${API_BASE_URL}/users/${id}`, {
       method: 'DELETE',
-      headers: getAuthHeaders(),
     });
     return handleResponse<void>(response);
   },
 
   approve: async (id: string, approvedBy: string): Promise<User> => {
-    const response = await fetch(`${API_BASE_URL}/users/${id}/approve`, {
+    const response = await apiFetch(`${API_BASE_URL}/users/${id}/approve`, {
       method: 'POST',
-      headers: getAuthHeaders(true),
       body: JSON.stringify({ approvedBy }),
     });
     return handleResponse<User>(response);
   },
 
   reject: async (id: string, rejectedBy: string, rejectionReason: string): Promise<User> => {
-    const response = await fetch(`${API_BASE_URL}/users/${id}/reject`, {
+    const response = await apiFetch(`${API_BASE_URL}/users/${id}/reject`, {
       method: 'POST',
-      headers: getAuthHeaders(true),
       body: JSON.stringify({ rejectedBy, rejectionReason }),
     });
     return handleResponse<User>(response);
@@ -166,50 +188,42 @@ export const usersApi = {
 export const customersApi = {
   getAll: async (params?: QueryParams): Promise<PaginatedData<Customer>> => {
     const queryString = buildQueryString(params);
-    const response = await fetch(`${API_BASE_URL}/customers${queryString}`, {
-      headers: getAuthHeaders(),
-    });
+    const response = await apiFetch(`${API_BASE_URL}/customers${queryString}`);
     return handleResponse<PaginatedData<Customer>>(response);
   },
 
   getById: async (id: string): Promise<Customer> => {
-    const response = await fetch(`${API_BASE_URL}/customers/${id}`, {
-      headers: getAuthHeaders(),
-    });
+    const response = await apiFetch(`${API_BASE_URL}/customers/${id}`);
     return handleResponse<Customer>(response);
   },
 
   create: async (customer: Omit<Customer, 'id'>): Promise<Customer> => {
-    const response = await fetch(`${API_BASE_URL}/customers`, {
+    const response = await apiFetch(`${API_BASE_URL}/customers`, {
       method: 'POST',
-      headers: getAuthHeaders(true),
       body: JSON.stringify(customer),
     });
     return handleResponse<Customer>(response);
   },
 
   update: async (id: string, customer: Pick<Customer, 'name' | 'email' | 'phone'>): Promise<Customer> => {
-    const response = await fetch(`${API_BASE_URL}/customers/${id}`, {
+    const response = await apiFetch(`${API_BASE_URL}/customers/${id}`, {
       method: 'PUT',
-      headers: getAuthHeaders(true),
       body: JSON.stringify(customer),
     });
     return handleResponse<Customer>(response);
   },
 
   updateStatus: async (id: string, status: string): Promise<Customer> => {
-    const response = await fetch(`${API_BASE_URL}/customers/${id}/status`, {
+    const response = await apiFetch(`${API_BASE_URL}/customers/${id}/status`, {
       method: 'PATCH',
-      headers: getAuthHeaders(true),
       body: JSON.stringify({ status }),
     });
     return handleResponse<Customer>(response);
   },
 
   delete: async (id: string): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/customers/${id}`, {
+    const response = await apiFetch(`${API_BASE_URL}/customers/${id}`, {
       method: 'DELETE',
-      headers: getAuthHeaders(),
     });
     return handleResponse<void>(response);
   },
@@ -219,59 +233,50 @@ export const customersApi = {
 export const productsApi = {
   getAll: async (params?: QueryParams): Promise<PaginatedData<Product>> => {
     const queryString = buildQueryString(params);
-    const response = await fetch(`${API_BASE_URL}/products${queryString}`, {
-      headers: getAuthHeaders(),
-    });
+    const response = await apiFetch(`${API_BASE_URL}/products${queryString}`);
     return handleResponse<PaginatedData<Product>>(response);
   },
 
   getById: async (id: string): Promise<Product> => {
-    const response = await fetch(`${API_BASE_URL}/products/${id}`, {
-      headers: getAuthHeaders(),
-    });
+    const response = await apiFetch(`${API_BASE_URL}/products/${id}`);
     return handleResponse<Product>(response);
   },
 
   create: async (product: Omit<Product, 'id' | 'createdAt' | 'createdBy' | 'createdByName' | 'createdByEmail' | 'reviewSummary' | 'recentReviews'>): Promise<Product> => {
-    const response = await fetch(`${API_BASE_URL}/products`, {
+    const response = await apiFetch(`${API_BASE_URL}/products`, {
       method: 'POST',
-      headers: getAuthHeaders(true),
       body: JSON.stringify(product),
     });
     return handleResponse<Product>(response);
   },
 
   update: async (id: string, product: Pick<Product, 'name' | 'category' | 'price'>): Promise<Product> => {
-    const response = await fetch(`${API_BASE_URL}/products/${id}`, {
+    const response = await apiFetch(`${API_BASE_URL}/products/${id}`, {
       method: 'PUT',
-      headers: getAuthHeaders(true),
       body: JSON.stringify(product),
     });
     return handleResponse<Product>(response);
   },
 
   updateStock: async (id: string, stock: number): Promise<Product> => {
-    const response = await fetch(`${API_BASE_URL}/products/${id}/stock`, {
+    const response = await apiFetch(`${API_BASE_URL}/products/${id}/stock`, {
       method: 'PATCH',
-      headers: getAuthHeaders(true),
       body: JSON.stringify({ stock }),
     });
     return handleResponse<Product>(response);
   },
 
   updateStatus: async (id: string, status: string): Promise<Product> => {
-    const response = await fetch(`${API_BASE_URL}/products/${id}/status`, {
+    const response = await apiFetch(`${API_BASE_URL}/products/${id}/status`, {
       method: 'PATCH',
-      headers: getAuthHeaders(true),
       body: JSON.stringify({ status }),
     });
     return handleResponse<Product>(response);
   },
 
   delete: async (id: string): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/products/${id}`, {
+    const response = await apiFetch(`${API_BASE_URL}/products/${id}`, {
       method: 'DELETE',
-      headers: getAuthHeaders(),
     });
     return handleResponse<void>(response);
   },
@@ -281,41 +286,34 @@ export const productsApi = {
 export const ordersApi = {
   getAll: async (params?: QueryParams): Promise<PaginatedData<Order>> => {
     const queryString = buildQueryString(params);
-    const response = await fetch(`${API_BASE_URL}/orders${queryString}`, {
-      headers: getAuthHeaders(),
-    });
+    const response = await apiFetch(`${API_BASE_URL}/orders${queryString}`);
     return handleResponse<PaginatedData<Order>>(response);
   },
 
   getById: async (id: string): Promise<Order> => {
-    const response = await fetch(`${API_BASE_URL}/orders/${id}`, {
-      headers: getAuthHeaders(),
-    });
+    const response = await apiFetch(`${API_BASE_URL}/orders/${id}`);
     return handleResponse<Order>(response);
   },
 
   create: async (order: Omit<Order, 'id'>): Promise<Order> => {
-    const response = await fetch(`${API_BASE_URL}/orders`, {
+    const response = await apiFetch(`${API_BASE_URL}/orders`, {
       method: 'POST',
-      headers: getAuthHeaders(true),
       body: JSON.stringify(order),
     });
     return handleResponse<Order>(response);
   },
 
   updateStatus: async (id: string, status: string, cancellationReason?: string): Promise<Order> => {
-    const response = await fetch(`${API_BASE_URL}/orders/${id}/status`, {
+    const response = await apiFetch(`${API_BASE_URL}/orders/${id}/status`, {
       method: 'PATCH',
-      headers: getAuthHeaders(true),
       body: JSON.stringify({ status, cancellationReason }),
     });
     return handleResponse<Order>(response);
   },
 
   delete: async (id: string): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/orders/${id}`, {
+    const response = await apiFetch(`${API_BASE_URL}/orders/${id}`, {
       method: 'DELETE',
-      headers: getAuthHeaders(),
     });
     return handleResponse<void>(response);
   },
@@ -325,41 +323,34 @@ export const ordersApi = {
 export const reviewsApi = {
   getAll: async (params?: QueryParams): Promise<PaginatedData<Review>> => {
     const queryString = buildQueryString(params);
-    const response = await fetch(`${API_BASE_URL}/reviews${queryString}`, {
-      headers: getAuthHeaders(),
-    });
+    const response = await apiFetch(`${API_BASE_URL}/reviews${queryString}`);
     return handleResponse<PaginatedData<Review>>(response);
   },
 
   getById: async (id: string): Promise<Review> => {
-    const response = await fetch(`${API_BASE_URL}/reviews/${id}`, {
-      headers: getAuthHeaders(),
-    });
+    const response = await apiFetch(`${API_BASE_URL}/reviews/${id}`);
     return handleResponse<Review>(response);
   },
 
   create: async (review: Omit<Review, 'id'>): Promise<Review> => {
-    const response = await fetch(`${API_BASE_URL}/reviews`, {
+    const response = await apiFetch(`${API_BASE_URL}/reviews`, {
       method: 'POST',
-      headers: getAuthHeaders(true),
       body: JSON.stringify(review),
     });
     return handleResponse<Review>(response);
   },
 
   update: async (id: string, review: Partial<Review>): Promise<Review> => {
-    const response = await fetch(`${API_BASE_URL}/reviews/${id}`, {
+    const response = await apiFetch(`${API_BASE_URL}/reviews/${id}`, {
       method: 'PATCH',
-      headers: getAuthHeaders(true),
       body: JSON.stringify(review),
     });
     return handleResponse<Review>(response);
   },
 
   delete: async (id: string): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/reviews/${id}`, {
+    const response = await apiFetch(`${API_BASE_URL}/reviews/${id}`, {
       method: 'DELETE',
-      headers: getAuthHeaders(),
     });
     return handleResponse<void>(response);
   },
@@ -368,35 +359,29 @@ export const reviewsApi = {
 // Auth API
 export const authApi = {
   getProfile: async (): Promise<User> => {
-    const response = await fetch(`${API_BASE_URL}/users/me`, {
-      method: 'GET',
-      headers: getAuthHeaders(),
-    });
+    const response = await apiFetch(`${API_BASE_URL}/users/me`);
     return handleResponse<User>(response);
   },
 
   updateProfile: async (data: { name: string; email: string; phone: string }) => {
-    const response = await fetch(`${API_BASE_URL}/users/me`, {
+    const response = await apiFetch(`${API_BASE_URL}/users/me`, {
       method: 'PATCH',
-      headers: getAuthHeaders(true),
       body: JSON.stringify(data),
     });
     return handleResponse<User>(response);
   },
 
   changePassword: async (currentPassword: string, newPassword: string): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/auth/password`, {
+    const response = await apiFetch(`${API_BASE_URL}/auth/password`, {
       method: 'PUT',
-      headers: getAuthHeaders(true),
       body: JSON.stringify({ currentPassword, newPassword }),
     });
     return handleResponse<void>(response);
   },
 
   logout: async (): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/auth/logout`, {
+    const response = await apiFetch(`${API_BASE_URL}/auth/logout`, {
       method: 'POST',
-      headers: getAuthHeaders(),
     });
     return handleResponse<void>(response);
   },
@@ -435,9 +420,7 @@ export interface DashboardStats {
 
 export const dashboardApi = {
   getStats: async (): Promise<DashboardStats> => {
-    const response = await fetch(`${API_BASE_URL}/dashboard/stats`, {
-      headers: getAuthHeaders(),
-    });
+    const response = await apiFetch(`${API_BASE_URL}/dashboard/stats`);
     return handleResponse<DashboardStats>(response);
   },
 };
