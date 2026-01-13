@@ -298,7 +298,15 @@ export const Products: React.FC = () => {
       }
 
       try {
-        await updateProduct(editingProduct.id, formData);
+        // price를 number로 변환
+        const priceNumber = typeof formData.price === 'string'
+          ? parseFloat(formData.price.replace(/[^0-9.]/g, '')) || 0
+          : formData.price;
+
+        await updateProduct(editingProduct.id, {
+          ...formData,
+          price: priceNumber,
+        });
         toast.success(`${formData.name} 상품 정보가 수정되었습니다.`);
         handleCloseFormModal();
       } catch (error) {
@@ -319,13 +327,19 @@ export const Products: React.FC = () => {
     // 재고가 0이면 자동으로 품절 처리
     const status = addFormData.stock === 0 ? PRODUCT_STATUS.SOLD_OUT : addFormData.status;
 
+    // price를 number로 변환
+    const priceNumber = typeof addFormData.price === 'string'
+      ? parseFloat(addFormData.price.replace(/[^0-9.]/g, '')) || 0
+      : addFormData.price;
+
     try {
       await addProduct({
         ...addFormData,
+        price: priceNumber,
         status
       });
       toast.success(`${addFormData.name} 상품이 추가되었습니다.`);
-      
+
       // 폼 초기화
       setAddFormData({
         name: '',
@@ -334,9 +348,9 @@ export const Products: React.FC = () => {
         stock: 0,
         status: PRODUCT_STATUS.AVAILABLE,
       });
-      
+
       handleCloseFormModal();
-      
+
       // 서버에서 최신 데이터를 가져오기 위해 첫 페이지로 이동하고 강제 새로고침
       setCurrentPage(1);
       setTimeout(() => {
