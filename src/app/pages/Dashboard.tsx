@@ -5,6 +5,7 @@ import { DashboardSkeleton } from '../components/Skeleton';
 import { Users, Package, ShoppingCart, Star, TrendingUp, AlertTriangle, CheckCircle, Clock, GripVertical } from 'lucide-react';
 import { useThemeStore } from '../../store/themeStore';
 import { CUSTOMER_STATUS_LABELS, ORDER_STATUS_LABELS } from '../../constants/roles';
+import { formatCurrency } from '../../utils/format';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
 import { Badge } from '../components/ui/badge';
@@ -217,8 +218,8 @@ export const Dashboard: React.FC = () => {
                 <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">총 매출</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-emerald-500">{((dashboardStats?.widgets.totalRevenue || 0) / 10000).toFixed(0)}만원</div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">오늘: {((dashboardStats?.widgets.todayRevenue || 0) / 10000).toFixed(0)}만원</p>
+                <div className="text-2xl font-bold text-emerald-500">{formatCurrency(dashboardStats?.widgets.totalRevenue || 0)}</div>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">오늘: {formatCurrency(dashboardStats?.widgets.todayRevenue || 0)}</p>
               </CardContent>
             </Card>
           </SortableWidget>
@@ -329,7 +330,7 @@ export const Dashboard: React.FC = () => {
                           <TableCell>{order.id}</TableCell>
                           <TableCell>{order.customer}</TableCell>
                           <TableCell>{order.product}</TableCell>
-                          <TableCell>{order.amount}</TableCell>
+                          <TableCell>{formatCurrency(order.amount)}</TableCell>
                           <TableCell>
                             <Badge variant={
                               order.status === 'DELIVERED' ? 'default' : order.status === 'SHIPPING' ? 'secondary' : 'outline'

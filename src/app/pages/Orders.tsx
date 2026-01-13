@@ -15,6 +15,7 @@ import { useAuthStore } from '../../store/authStore';
 import { ROLES, ROLE_LABELS, ORDER_STATUS, ORDER_STATUS_LABELS } from '../../constants/roles';
 import { toast } from 'sonner';
 import { ensureDateFormat } from '../../utils/date';
+import { formatCurrency } from '../../utils/format';
 import { ordersApi } from '../../api';
 import type { Column, Order, OrderStatus } from '../../types';
 
@@ -141,13 +142,20 @@ export const Orders: React.FC = () => {
   const [viewingOrder, setViewingOrder] = useState<Order | null>(null);
   const [formData, setFormData] = useState<OrderStatus>(ORDER_STATUS.PREPARING);
   const [cancellationReason, setCancellationReason] = useState('');
-  const [createFormData, setCreateFormData] = useState({
+  const [createFormData, setCreateFormData] = useState<{
+    customerId: string;
+    customer: string;
+    productId: string;
+    product: string;
+    quantity: string;
+    amount: number;
+  }>({
     customerId: '',
     customer: '',
     productId: '',
     product: '',
     quantity: '1',
-    amount: '',
+    amount: 0,
   });
 
   const handleOpenEditModal = (order: Order) => {
@@ -277,7 +285,7 @@ export const Orders: React.FC = () => {
       productId: '',
       product: '',
       quantity: '1',
-      amount: '',
+      amount: 0,
     });
   };
 
@@ -300,10 +308,8 @@ export const Orders: React.FC = () => {
         const selectedProduct = products.find((p) => p.id === value);
         if (selectedProduct) {
           updated.product = selectedProduct.name;
-          const unitPrice = parseInt(selectedProduct.price.replace(/[^0-9]/g, ''));
           const quantity = parseInt(updated.quantity) || 1;
-          const totalAmount = unitPrice * quantity;
-          updated.amount = `${totalAmount.toLocaleString()}원`;
+          updated.amount = selectedProduct.price * quantity;
         }
       }
 
@@ -311,10 +317,8 @@ export const Orders: React.FC = () => {
       if (name === 'quantity' && updated.productId) {
         const selectedProduct = products.find((p) => p.id === updated.productId);
         if (selectedProduct) {
-          const unitPrice = parseInt(selectedProduct.price.replace(/[^0-9]/g, ''));
           const quantity = parseInt(value) || 1;
-          const totalAmount = unitPrice * quantity;
-          updated.amount = `${totalAmount.toLocaleString()}원`;
+          updated.amount = selectedProduct.price * quantity;
         }
       }
 
@@ -356,8 +360,8 @@ export const Orders: React.FC = () => {
       return;
     }
 
-    if (!createFormData.amount.trim()) {
-      toast.error('금액을 입력해주세요.');
+    if (!createFormData.amount || createFormData.amount === 0) {
+      toast.error('상품과 수량을 선택해주세요.');
       return;
     }
 
@@ -563,6 +567,9 @@ export const Orders: React.FC = () => {
                     }
                     return <span className="text-gray-400 dark:text-gray-600">-</span>;
                   }
+                  if (columnKey === 'amount') {
+                    return formatCurrency(item[columnKey]);
+                  }
                   return item[columnKey];
                 }}
               />
@@ -718,7 +725,7 @@ export const Orders: React.FC = () => {
                   </div>
                   <div>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">주문 금액</p>
-                    <p className="text-sm font-semibold text-blue-600 dark:text-blue-400">{viewingOrder.amount}</p>
+                    <p className="text-sm font-semibold text-blue-600 dark:text-blue-400">{formatCurrency(viewingOrder.amount)}</p>
                   </div>
                 </div>
               </div>
@@ -889,7 +896,7 @@ export const Orders: React.FC = () => {
             label="총 금액 (자동 계산)"
             name="amount"
             type="text"
-            value={createFormData.amount}
+            value={createFormData.amount ? formatCurrency(createFormData.amount) : ''}
             onChange={handleCreateFormChange}
             placeholder="상품과 수량 선택 시 자동 계산됩니다"
             readOnly

@@ -15,6 +15,7 @@ import { useAuthStore } from '../../store/authStore';
 import { ROLES, ROLE_LABELS, PRODUCT_STATUS, PRODUCT_CATEGORIES, PRODUCT_STATUS_LABELS, PRODUCT_CATEGORY_LABELS } from '../../constants/roles';
 import { toast } from 'sonner';
 import { ensureDateFormat } from '../../utils/date';
+import { formatCurrency } from '../../utils/format';
 import { productsApi } from '../../api';
 import type { Column, Product, ProductStatus } from '../../types';
 
@@ -564,6 +565,9 @@ export const Products: React.FC = () => {
                       </span>
                     );
                   }
+                  if (columnKey === 'price') {
+                    return formatCurrency(item[columnKey]);
+                  }
                   return item[columnKey];
                 }}
               />
@@ -617,7 +621,7 @@ export const Products: React.FC = () => {
               name="price"
               value={formData.price}
               onChange={handleFormChange}
-              placeholder="89,000원"
+              placeholder="89000"
               required
             />
             <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-200 dark:border-blue-800">
@@ -653,7 +657,7 @@ export const Products: React.FC = () => {
               name="price"
               value={addFormData.price}
               onChange={handleAddFormChange}
-              placeholder="89,000원"
+              placeholder="89000"
               required
             />
             <Input
@@ -818,7 +822,7 @@ export const Products: React.FC = () => {
                   </div>
                   <div>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">가격</p>
-                    <p className="text-sm font-semibold text-blue-600 dark:text-blue-400">{viewingProduct.price}</p>
+                    <p className="text-sm font-semibold text-blue-600 dark:text-blue-400">{formatCurrency(viewingProduct.price)}</p>
                   </div>
                 </div>
               </div>

@@ -14,6 +14,7 @@ import {useAuthStore} from '../../store/authStore';
 import {CUSTOMER_STATUS, CUSTOMER_STATUS_LABELS, ROLE_LABELS, ROLES} from '../../constants/roles';
 import {toast} from 'sonner';
 import {ensureDateFormat} from '../../utils/date';
+import {formatCurrency} from '../../utils/format';
 import {customersApi} from '../../api';
 import type {Column, Customer, CustomerStatus} from '../../types';
 
@@ -330,6 +331,9 @@ export const Customers: React.FC = () => {
                       </span>
                     );
                   }
+                  if (columnKey === 'totalSpent') {
+                    return formatCurrency(item[columnKey]);
+                  }
                   return item[columnKey];
                 }}
                 renderCustomActions={(item) => (
@@ -529,7 +533,7 @@ export const Customers: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">총 구매액</p>
-                  <p className="text-sm font-semibold text-blue-600 dark:text-blue-400">{viewingCustomer.totalSpent || '0원'}</p>
+                  <p className="text-sm font-semibold text-blue-600 dark:text-blue-400">{formatCurrency(viewingCustomer.totalSpent)}</p>
                 </div>
               </div>
             </div>

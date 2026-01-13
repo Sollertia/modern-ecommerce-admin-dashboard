@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Trash2, Edit, ChevronUp, ChevronDown } from 'lucide-react';
+import { formatCurrency } from '../../utils/format';
 
 interface Column {
   key: string;
@@ -142,11 +143,26 @@ export const DataTable: React.FC<DataTableProps> = ({
                     />
                   </td>
                 )}
-                {columns.map((column) => (
-                  <td key={column.key} className="p-4 text-gray-700 dark:text-gray-300">
-                    {renderCell ? renderCell(item, column.key) : item[column.key]}
-                  </td>
-                ))}
+                {columns.map((column) => {
+                  // 금액 관련 필드는 자동으로 포맷팅
+                  const isCurrencyField = ['price', 'amount', 'totalSpent'].includes(column.key);
+                  const value = item[column.key];
+
+                  let displayValue;
+                  if (renderCell) {
+                    displayValue = renderCell(item, column.key);
+                  } else if (isCurrencyField && typeof value === 'number') {
+                    displayValue = formatCurrency(value);
+                  } else {
+                    displayValue = value;
+                  }
+
+                  return (
+                    <td key={column.key} className="p-4 text-gray-700 dark:text-gray-300">
+                      {displayValue}
+                    </td>
+                  );
+                })}
                 {(onEdit || onDelete || renderCustomActions) && (
                   <td className="p-4">
                     <div className="flex gap-2 items-center">

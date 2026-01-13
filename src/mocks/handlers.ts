@@ -26,9 +26,7 @@ function excludePasswordFromArray<T extends { password?: string }>(arr: T[]): Om
 const START_DATE = new Date('2025-01-01');
 const END_DATE = new Date();
 
-// --- Helper Functions for Amount ---
-const parseAmount = (amount: string) => parseInt(amount.replace(/[^0-9]/g, '')) || 0;
-const formatAmount = (amount: number) => `${amount.toLocaleString()}원`;
+// --- Helper Functions (Deprecated - 금액은 이제 number로 처리) ---
 
 // --- Base Data Definitions ---
 let users: User[] = [
@@ -87,124 +85,124 @@ let customers: Customer[] = [
   { id: 'C039', name: '진이준', email: 'ijun@example.com', password: 'customer123', phone: '010-1234-0029', status: CUSTOMER_STATUS.INACTIVE },
   { id: 'C040', name: '천수현', email: 'soohyun@example.com', password: 'customer123', phone: '010-1234-0030', status: CUSTOMER_STATUS.ACTIVE },
   { id: 'C041', name: '최삭제', email: 'delete-test@example.com', password: 'customer123', phone: '010-9999-9999', status: CUSTOMER_STATUS.ACTIVE },
-].map(c => ({ ...c, createdAt: '', totalOrders: 0, totalSpent: '0원' }));
+].map(c => ({ ...c, createdAt: '', totalOrders: 0, totalSpent: 0 }));
 
 let products: Product[] = [
   // Electronics (13)
-  { id: 'P001', name: '노트북', category: PRODUCT_CATEGORIES.ELECTRONICS, price: '1,500,000원', stock: 15, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P002', name: '스마트폰', category: PRODUCT_CATEGORIES.ELECTRONICS, price: '950,000원', stock: 32, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P003', name: '태블릿', category: PRODUCT_CATEGORIES.ELECTRONICS, price: '680,000원', stock: 28, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P004', name: '무선이어폰', category: PRODUCT_CATEGORIES.ELECTRONICS, price: '89,000원', stock: 45, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P005', name: '블루투스 스피커', category: PRODUCT_CATEGORIES.ELECTRONICS, price: '125,000원', stock: 23, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P006', name: '기계식 키보드', category: PRODUCT_CATEGORIES.ELECTRONICS, price: '159,000원', stock: 3, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P007', name: '게이밍 마우스', category: PRODUCT_CATEGORIES.ELECTRONICS, price: '78,000원', stock: 56, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P008', name: '27인치 모니터', category: PRODUCT_CATEGORIES.ELECTRONICS, price: '350,000원', stock: 18, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P009', name: '웹캠', category: PRODUCT_CATEGORIES.ELECTRONICS, price: '95,000원', stock: 0, status: PRODUCT_STATUS.SOLD_OUT },
-  { id: 'P010', name: '고속충전기', category: PRODUCT_CATEGORIES.ELECTRONICS, price: '35,000원', stock: 89, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P011', name: '스마트워치', category: PRODUCT_CATEGORIES.ELECTRONICS, price: '450,000원', stock: 25, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P012', name: '외장하드 1TB', category: PRODUCT_CATEGORIES.ELECTRONICS, price: '89,000원', stock: 0, status: PRODUCT_STATUS.SOLD_OUT },
-  { id: 'P013', name: '그래픽 카드', category: PRODUCT_CATEGORIES.ELECTRONICS, price: '890,000원', stock: 10, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P001', name: '노트북', category: PRODUCT_CATEGORIES.ELECTRONICS, price: 1500000, stock: 15, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P002', name: '스마트폰', category: PRODUCT_CATEGORIES.ELECTRONICS, price: 950000, stock: 32, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P003', name: '태블릿', category: PRODUCT_CATEGORIES.ELECTRONICS, price: 680000, stock: 28, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P004', name: '무선이어폰', category: PRODUCT_CATEGORIES.ELECTRONICS, price: 89000, stock: 45, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P005', name: '블루투스 스피커', category: PRODUCT_CATEGORIES.ELECTRONICS, price: 125000, stock: 23, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P006', name: '기계식 키보드', category: PRODUCT_CATEGORIES.ELECTRONICS, price: 159000, stock: 3, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P007', name: '게이밍 마우스', category: PRODUCT_CATEGORIES.ELECTRONICS, price: 78000, stock: 56, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P008', name: '27인치 모니터', category: PRODUCT_CATEGORIES.ELECTRONICS, price: 350000, stock: 18, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P009', name: '웹캠', category: PRODUCT_CATEGORIES.ELECTRONICS, price: 95000, stock: 0, status: PRODUCT_STATUS.SOLD_OUT },
+  { id: 'P010', name: '고속충전기', category: PRODUCT_CATEGORIES.ELECTRONICS, price: 35000, stock: 89, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P011', name: '스마트워치', category: PRODUCT_CATEGORIES.ELECTRONICS, price: 450000, stock: 25, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P012', name: '외장하드 1TB', category: PRODUCT_CATEGORIES.ELECTRONICS, price: 89000, stock: 0, status: PRODUCT_STATUS.SOLD_OUT },
+  { id: 'P013', name: '그래픽 카드', category: PRODUCT_CATEGORIES.ELECTRONICS, price: 890000, stock: 10, status: PRODUCT_STATUS.AVAILABLE },
 
   // Fashion (13)
-  { id: 'P014', name: '기본 티셔츠', category: PRODUCT_CATEGORIES.FASHION, price: '25,000원', stock: 120, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P015', name: '청바지', category: PRODUCT_CATEGORIES.FASHION, price: '79,000원', stock: 45, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P016', name: '운동화', category: PRODUCT_CATEGORIES.FASHION, price: '129,000원', stock: 38, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P017', name: '백팩', category: PRODUCT_CATEGORIES.FASHION, price: '89,000원', stock: 52, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P018', name: '볼캡', category: PRODUCT_CATEGORIES.FASHION, price: '29,000원', stock: 78, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P019', name: '양말 세트', category: PRODUCT_CATEGORIES.FASHION, price: '15,000원', stock: 95, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P020', name: '후드티', category: PRODUCT_CATEGORIES.FASHION, price: '59,000원', stock: 2, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P021', name: '맨투맨', category: PRODUCT_CATEGORIES.FASHION, price: '49,000원', stock: 0, status: PRODUCT_STATUS.SOLD_OUT },
-  { id: 'P022', name: '슬랙스', category: PRODUCT_CATEGORIES.FASHION, price: '69,000원', stock: 60, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P023', name: '가죽 자켓', category: PRODUCT_CATEGORIES.FASHION, price: '199,000원', stock: 15, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P024', name: '코트', category: PRODUCT_CATEGORIES.FASHION, price: '259,000원', stock: 0, status: PRODUCT_STATUS.SOLD_OUT },
-  { id: 'P025', name: '패딩', category: PRODUCT_CATEGORIES.FASHION, price: '299,000원', stock: 30, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P026', name: '목도리', category: PRODUCT_CATEGORIES.FASHION, price: '39,000원', stock: 50, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P014', name: '기본 티셔츠', category: PRODUCT_CATEGORIES.FASHION, price: 25000, stock: 120, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P015', name: '청바지', category: PRODUCT_CATEGORIES.FASHION, price: 79000, stock: 45, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P016', name: '운동화', category: PRODUCT_CATEGORIES.FASHION, price: 129000, stock: 38, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P017', name: '백팩', category: PRODUCT_CATEGORIES.FASHION, price: 89000, stock: 52, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P018', name: '볼캡', category: PRODUCT_CATEGORIES.FASHION, price: 29000, stock: 78, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P019', name: '양말 세트', category: PRODUCT_CATEGORIES.FASHION, price: 15000, stock: 95, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P020', name: '후드티', category: PRODUCT_CATEGORIES.FASHION, price: 59000, stock: 2, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P021', name: '맨투맨', category: PRODUCT_CATEGORIES.FASHION, price: 49000, stock: 0, status: PRODUCT_STATUS.SOLD_OUT },
+  { id: 'P022', name: '슬랙스', category: PRODUCT_CATEGORIES.FASHION, price: 69000, stock: 60, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P023', name: '가죽 자켓', category: PRODUCT_CATEGORIES.FASHION, price: 199000, stock: 15, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P024', name: '코트', category: PRODUCT_CATEGORIES.FASHION, price: 259000, stock: 0, status: PRODUCT_STATUS.SOLD_OUT },
+  { id: 'P025', name: '패딩', category: PRODUCT_CATEGORIES.FASHION, price: 299000, stock: 30, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P026', name: '목도리', category: PRODUCT_CATEGORIES.FASHION, price: 39000, stock: 50, status: PRODUCT_STATUS.AVAILABLE },
 
   // Food (12)
-  { id: 'P027', name: '프리미엄 커피 원두', category: PRODUCT_CATEGORIES.FOOD, price: '28,000원', stock: 67, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P028', name: '녹차 티백', category: PRODUCT_CATEGORIES.FOOD, price: '12,000원', stock: 85, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P029', name: '견과류 믹스', category: PRODUCT_CATEGORIES.FOOD, price: '18,000원', stock: 43, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P030', name: '에너지바', category: PRODUCT_CATEGORIES.FOOD, price: '15,000원', stock: 92, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P031', name: '과일잼 세트', category: PRODUCT_CATEGORIES.FOOD, price: '22,000원', stock: 34, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P032', name: '올리브오일', category: PRODUCT_CATEGORIES.FOOD, price: '35,000원', stock: 28, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P033', name: '꿀 선물세트', category: PRODUCT_CATEGORIES.FOOD, price: '45,000원', stock: 1, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P034', name: '다크초콜릿', category: PRODUCT_CATEGORIES.FOOD, price: '8,000원', stock: 0, status: PRODUCT_STATUS.SOLD_OUT },
-  { id: 'P035', name: '프로틴바', category: PRODUCT_CATEGORIES.FOOD, price: '25,000원', stock: 100, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P036', name: '유기농 샐러드', category: PRODUCT_CATEGORIES.FOOD, price: '9,900원', stock: 50, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P037', name: '냉동 닭가슴살', category: PRODUCT_CATEGORIES.FOOD, price: '19,900원', stock: 0, status: PRODUCT_STATUS.SOLD_OUT },
-  { id: 'P038', name: '수제 소시지', category: PRODUCT_CATEGORIES.FOOD, price: '15,900원', stock: 40, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P027', name: '프리미엄 커피 원두', category: PRODUCT_CATEGORIES.FOOD, price: 28000, stock: 67, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P028', name: '녹차 티백', category: PRODUCT_CATEGORIES.FOOD, price: 12000, stock: 85, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P029', name: '견과류 믹스', category: PRODUCT_CATEGORIES.FOOD, price: 18000, stock: 43, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P030', name: '에너지바', category: PRODUCT_CATEGORIES.FOOD, price: 15000, stock: 92, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P031', name: '과일잼 세트', category: PRODUCT_CATEGORIES.FOOD, price: 22000, stock: 34, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P032', name: '올리브오일', category: PRODUCT_CATEGORIES.FOOD, price: 35000, stock: 28, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P033', name: '꿀 선물세트', category: PRODUCT_CATEGORIES.FOOD, price: 45000, stock: 1, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P034', name: '다크초콜릿', category: PRODUCT_CATEGORIES.FOOD, price: 8000, stock: 0, status: PRODUCT_STATUS.SOLD_OUT },
+  { id: 'P035', name: '프로틴바', category: PRODUCT_CATEGORIES.FOOD, price: 25000, stock: 100, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P036', name: '유기농 샐러드', category: PRODUCT_CATEGORIES.FOOD, price: 9900, stock: 50, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P037', name: '냉동 닭가슴살', category: PRODUCT_CATEGORIES.FOOD, price: 19900, stock: 0, status: PRODUCT_STATUS.SOLD_OUT },
+  { id: 'P038', name: '수제 소시지', category: PRODUCT_CATEGORIES.FOOD, price: 15900, stock: 40, status: PRODUCT_STATUS.AVAILABLE },
 
   // Living (12)
-  { id: 'P039', name: '호텔 수건 세트', category: PRODUCT_CATEGORIES.LIVING, price: '38,000원', stock: 45, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P040', name: '베개', category: PRODUCT_CATEGORIES.LIVING, price: '45,000원', stock: 32, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P041', name: '물티슈 대용량', category: PRODUCT_CATEGORIES.LIVING, price: '18,000원', stock: 100, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P042', name: '손세정제 세트', category: PRODUCT_CATEGORIES.LIVING, price: '25,000원', stock: 68, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P043', name: '주방세제 세트', category: PRODUCT_CATEGORIES.LIVING, price: '12,000원', stock: 88, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P044', name: '행주 세트', category: PRODUCT_CATEGORIES.LIVING, price: '9,000원', stock: 76, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P045', name: '방향제', category: PRODUCT_CATEGORIES.LIVING, price: '15,000원', stock: 4, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P046', name: 'LED 스탠드', category: PRODUCT_CATEGORIES.LIVING, price: '42,000원', stock: 25, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P047', name: '무선 청소기', category: PRODUCT_CATEGORIES.LIVING, price: '299,000원', stock: 15, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P048', name: '공기청정기', category: PRODUCT_CATEGORIES.LIVING, price: '199,000원', stock: 0, status: PRODUCT_STATUS.SOLD_OUT },
-  { id: 'P049', name: '가습기', category: PRODUCT_CATEGORIES.LIVING, price: '79,000원', stock: 30, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P050', name: '전기포트', category: PRODUCT_CATEGORIES.LIVING, price: '49,000원', stock: 50, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P039', name: '호텔 수건 세트', category: PRODUCT_CATEGORIES.LIVING, price: 38000, stock: 45, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P040', name: '베개', category: PRODUCT_CATEGORIES.LIVING, price: 45000, stock: 32, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P041', name: '물티슈 대용량', category: PRODUCT_CATEGORIES.LIVING, price: 18000, stock: 100, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P042', name: '손세정제 세트', category: PRODUCT_CATEGORIES.LIVING, price: 25000, stock: 68, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P043', name: '주방세제 세트', category: PRODUCT_CATEGORIES.LIVING, price: 12000, stock: 88, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P044', name: '행주 세트', category: PRODUCT_CATEGORIES.LIVING, price: 9000, stock: 76, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P045', name: '방향제', category: PRODUCT_CATEGORIES.LIVING, price: 15000, stock: 4, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P046', name: 'LED 스탠드', category: PRODUCT_CATEGORIES.LIVING, price: 42000, stock: 25, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P047', name: '무선 청소기', category: PRODUCT_CATEGORIES.LIVING, price: 299000, stock: 15, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P048', name: '공기청정기', category: PRODUCT_CATEGORIES.LIVING, price: 199000, stock: 0, status: PRODUCT_STATUS.SOLD_OUT },
+  { id: 'P049', name: '가습기', category: PRODUCT_CATEGORIES.LIVING, price: 79000, stock: 30, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P050', name: '전기포트', category: PRODUCT_CATEGORIES.LIVING, price: 49000, stock: 50, status: PRODUCT_STATUS.AVAILABLE },
 
   // Sports (12)
-  { id: 'P051', name: '요가매트', category: PRODUCT_CATEGORIES.SPORTS, price: '39,000원', stock: 54, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P052', name: '아령 세트', category: PRODUCT_CATEGORIES.SPORTS, price: '65,000원', stock: 22, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P053', name: '런닝화', category: PRODUCT_CATEGORIES.SPORTS, price: '159,000원', stock: 18, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P054', name: '운동복 세트', category: PRODUCT_CATEGORIES.SPORTS, price: '89,000원', stock: 35, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P055', name: '수영 고글', category: PRODUCT_CATEGORIES.SPORTS, price: '32,000원', stock: 0, status: PRODUCT_STATUS.SOLD_OUT },
-  { id: 'P056', name: '자전거 헬멧', category: PRODUCT_CATEGORIES.SPORTS, price: '78,000원', stock: 27, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P057', name: '탁구채 세트', category: PRODUCT_CATEGORIES.SPORTS, price: '55,000원', stock: 2, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P058', name: '배드민턴 라켓', category: PRODUCT_CATEGORIES.SPORTS, price: '95,000원', stock: 31, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P059', name: '축구공', category: PRODUCT_CATEGORIES.SPORTS, price: '29,000원', stock: 60, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P060', name: '농구공', category: PRODUCT_CATEGORIES.SPORTS, price: '32,000원', stock: 0, status: PRODUCT_STATUS.SOLD_OUT },
-  { id: 'P061', name: '등산 스틱', category: PRODUCT_CATEGORIES.SPORTS, price: '89,000원', stock: 25, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P062', name: '캠핑 의자', category: PRODUCT_CATEGORIES.SPORTS, price: '45,000원', stock: 40, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P051', name: '요가매트', category: PRODUCT_CATEGORIES.SPORTS, price: 39000, stock: 54, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P052', name: '아령 세트', category: PRODUCT_CATEGORIES.SPORTS, price: 65000, stock: 22, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P053', name: '런닝화', category: PRODUCT_CATEGORIES.SPORTS, price: 159000, stock: 18, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P054', name: '운동복 세트', category: PRODUCT_CATEGORIES.SPORTS, price: 89000, stock: 35, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P055', name: '수영 고글', category: PRODUCT_CATEGORIES.SPORTS, price: 32000, stock: 0, status: PRODUCT_STATUS.SOLD_OUT },
+  { id: 'P056', name: '자전거 헬멧', category: PRODUCT_CATEGORIES.SPORTS, price: 78000, stock: 27, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P057', name: '탁구채 세트', category: PRODUCT_CATEGORIES.SPORTS, price: 55000, stock: 2, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P058', name: '배드민턴 라켓', category: PRODUCT_CATEGORIES.SPORTS, price: 95000, stock: 31, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P059', name: '축구공', category: PRODUCT_CATEGORIES.SPORTS, price: 29000, stock: 60, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P060', name: '농구공', category: PRODUCT_CATEGORIES.SPORTS, price: 32000, stock: 0, status: PRODUCT_STATUS.SOLD_OUT },
+  { id: 'P061', name: '등산 스틱', category: PRODUCT_CATEGORIES.SPORTS, price: 89000, stock: 25, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P062', name: '캠핑 의자', category: PRODUCT_CATEGORIES.SPORTS, price: 45000, stock: 40, status: PRODUCT_STATUS.AVAILABLE },
 
   // Beauty (13)
-  { id: 'P063', name: '수분크림', category: PRODUCT_CATEGORIES.BEAUTY, price: '45,000원', stock: 48, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P064', name: '선크림', category: PRODUCT_CATEGORIES.BEAUTY, price: '28,000원', stock: 65, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P065', name: '립스틱 세트', category: PRODUCT_CATEGORIES.BEAUTY, price: '52,000원', stock: 37, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P066', name: '마스카라', category: PRODUCT_CATEGORIES.BEAUTY, price: '23,000원', stock: 71, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P067', name: '클렌징 오일', category: PRODUCT_CATEGORIES.BEAUTY, price: '32,000원', stock: 0, status: PRODUCT_STATUS.SOLD_OUT },
-  { id: 'P068', name: '토너', category: PRODUCT_CATEGORIES.BEAUTY, price: '35,000원', stock: 42, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P069', name: '향수', category: PRODUCT_CATEGORIES.BEAUTY, price: '89,000원', stock: 19, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P070', name: '핸드크림 세트', category: PRODUCT_CATEGORIES.BEAUTY, price: '18,000원', stock: 3, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P071', name: '헤어 에센스', category: PRODUCT_CATEGORIES.BEAUTY, price: '25,000원', stock: 60, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P072', name: '바디 로션', category: PRODUCT_CATEGORIES.BEAUTY, price: '19,000원', stock: 80, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P073', name: '아이섀도우 팔레트', category: PRODUCT_CATEGORIES.BEAUTY, price: '48,000원', stock: 0, status: PRODUCT_STATUS.SOLD_OUT },
-  { id: 'P074', name: '쿠션 파운데이션', category: PRODUCT_CATEGORIES.BEAUTY, price: '38,000원', stock: 50, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P075', name: '네일 폴리시 세트', category: PRODUCT_CATEGORIES.BEAUTY, price: '29,000원', stock: 40, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P063', name: '수분크림', category: PRODUCT_CATEGORIES.BEAUTY, price: 45000, stock: 48, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P064', name: '선크림', category: PRODUCT_CATEGORIES.BEAUTY, price: 28000, stock: 65, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P065', name: '립스틱 세트', category: PRODUCT_CATEGORIES.BEAUTY, price: 52000, stock: 37, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P066', name: '마스카라', category: PRODUCT_CATEGORIES.BEAUTY, price: 23000, stock: 71, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P067', name: '클렌징 오일', category: PRODUCT_CATEGORIES.BEAUTY, price: 32000, stock: 0, status: PRODUCT_STATUS.SOLD_OUT },
+  { id: 'P068', name: '토너', category: PRODUCT_CATEGORIES.BEAUTY, price: 35000, stock: 42, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P069', name: '향수', category: PRODUCT_CATEGORIES.BEAUTY, price: 89000, stock: 19, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P070', name: '핸드크림 세트', category: PRODUCT_CATEGORIES.BEAUTY, price: 18000, stock: 3, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P071', name: '헤어 에센스', category: PRODUCT_CATEGORIES.BEAUTY, price: 25000, stock: 60, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P072', name: '바디 로션', category: PRODUCT_CATEGORIES.BEAUTY, price: 19000, stock: 80, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P073', name: '아이섀도우 팔레트', category: PRODUCT_CATEGORIES.BEAUTY, price: 48000, stock: 0, status: PRODUCT_STATUS.SOLD_OUT },
+  { id: 'P074', name: '쿠션 파운데이션', category: PRODUCT_CATEGORIES.BEAUTY, price: 38000, stock: 50, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P075', name: '네일 폴리시 세트', category: PRODUCT_CATEGORIES.BEAUTY, price: 29000, stock: 40, status: PRODUCT_STATUS.AVAILABLE },
 
   // Books (13)
-  { id: 'P076', name: '베스트셀러 소설', category: PRODUCT_CATEGORIES.BOOKS, price: '16,800원', stock: 58, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P077', name: '자기계발서', category: PRODUCT_CATEGORIES.BOOKS, price: '18,900원', stock: 45, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P078', name: 'IT 전문서적', category: PRODUCT_CATEGORIES.BOOKS, price: '35,000원', stock: 24, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P079', name: '요리책', category: PRODUCT_CATEGORIES.BOOKS, price: '25,000원', stock: 38, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P080', name: '경제경영서', category: PRODUCT_CATEGORIES.BOOKS, price: '22,000원', stock: 51, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P081', name: '에세이', category: PRODUCT_CATEGORIES.BOOKS, price: '14,500원', stock: 67, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P082', name: '어린이 동화책', category: PRODUCT_CATEGORIES.BOOKS, price: '12,000원', stock: 0, status: PRODUCT_STATUS.SOLD_OUT },
-  { id: 'P083', name: '만화책 세트', category: PRODUCT_CATEGORIES.BOOKS, price: '48,000원', stock: 1, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P084', name: '역사책', category: PRODUCT_CATEGORIES.BOOKS, price: '28,000원', stock: 30, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P085', name: '과학 교양서', category: PRODUCT_CATEGORIES.BOOKS, price: '21,000원', stock: 40, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P086', name: '여행 가이드북', category: PRODUCT_CATEGORIES.BOOKS, price: '19,800원', stock: 25, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P087', name: '외국어 학습서', category: PRODUCT_CATEGORIES.BOOKS, price: '24,000원', stock: 50, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P088', name: '잡지', category: PRODUCT_CATEGORIES.BOOKS, price: '9,900원', stock: 0, status: PRODUCT_STATUS.SOLD_OUT },
+  { id: 'P076', name: '베스트셀러 소설', category: PRODUCT_CATEGORIES.BOOKS, price: 16800, stock: 58, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P077', name: '자기계발서', category: PRODUCT_CATEGORIES.BOOKS, price: 18900, stock: 45, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P078', name: 'IT 전문서적', category: PRODUCT_CATEGORIES.BOOKS, price: 35000, stock: 24, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P079', name: '요리책', category: PRODUCT_CATEGORIES.BOOKS, price: 25000, stock: 38, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P080', name: '경제경영서', category: PRODUCT_CATEGORIES.BOOKS, price: 22000, stock: 51, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P081', name: '에세이', category: PRODUCT_CATEGORIES.BOOKS, price: 14500, stock: 67, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P082', name: '어린이 동화책', category: PRODUCT_CATEGORIES.BOOKS, price: 12000, stock: 0, status: PRODUCT_STATUS.SOLD_OUT },
+  { id: 'P083', name: '만화책 세트', category: PRODUCT_CATEGORIES.BOOKS, price: 48000, stock: 1, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P084', name: '역사책', category: PRODUCT_CATEGORIES.BOOKS, price: 28000, stock: 30, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P085', name: '과학 교양서', category: PRODUCT_CATEGORIES.BOOKS, price: 21000, stock: 40, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P086', name: '여행 가이드북', category: PRODUCT_CATEGORIES.BOOKS, price: 19800, stock: 25, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P087', name: '외국어 학습서', category: PRODUCT_CATEGORIES.BOOKS, price: 24000, stock: 50, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P088', name: '잡지', category: PRODUCT_CATEGORIES.BOOKS, price: 9900, stock: 0, status: PRODUCT_STATUS.SOLD_OUT },
 
   // Toys (12)
-  { id: 'P089', name: '레고 세트', category: PRODUCT_CATEGORIES.TOYS, price: '89,000원', stock: 32, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P090', name: '직소 퍼즐', category: PRODUCT_CATEGORIES.TOYS, price: '25,000원', stock: 46, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P091', name: '보드게임', category: PRODUCT_CATEGORIES.TOYS, price: '45,000원', stock: 28, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P092', name: '프라모델', category: PRODUCT_CATEGORIES.TOYS, price: '38,000원', stock: 35, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P093', name: '인형', category: PRODUCT_CATEGORIES.TOYS, price: '32,000원', stock: 52, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P094', name: 'RC카', category: PRODUCT_CATEGORIES.TOYS, price: '125,000원', stock: 15, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P095', name: '드론', category: PRODUCT_CATEGORIES.TOYS, price: '280,000원', stock: 2, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P096', name: '전동킥보드', category: PRODUCT_CATEGORIES.TOYS, price: '450,000원', stock: 8, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P097', name: '액션 피규어', category: PRODUCT_CATEGORIES.TOYS, price: '59,000원', stock: 0, status: PRODUCT_STATUS.SOLD_OUT },
-  { id: 'P098', name: '슬라임 세트', category: PRODUCT_CATEGORIES.TOYS, price: '19,000원', stock: 60, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P099', name: '미니카 트랙', category: PRODUCT_CATEGORIES.TOYS, price: '75,000원', stock: 25, status: PRODUCT_STATUS.AVAILABLE },
-  { id: 'P100', name: '인형의 집', category: PRODUCT_CATEGORIES.TOYS, price: '150,000원', stock: 0, status: PRODUCT_STATUS.SOLD_OUT },
+  { id: 'P089', name: '레고 세트', category: PRODUCT_CATEGORIES.TOYS, price: 89000, stock: 32, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P090', name: '직소 퍼즐', category: PRODUCT_CATEGORIES.TOYS, price: 25000, stock: 46, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P091', name: '보드게임', category: PRODUCT_CATEGORIES.TOYS, price: 45000, stock: 28, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P092', name: '프라모델', category: PRODUCT_CATEGORIES.TOYS, price: 38000, stock: 35, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P093', name: '인형', category: PRODUCT_CATEGORIES.TOYS, price: 32000, stock: 52, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P094', name: 'RC카', category: PRODUCT_CATEGORIES.TOYS, price: 125000, stock: 15, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P095', name: '드론', category: PRODUCT_CATEGORIES.TOYS, price: 280000, stock: 2, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P096', name: '전동킥보드', category: PRODUCT_CATEGORIES.TOYS, price: 450000, stock: 8, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P097', name: '액션 피규어', category: PRODUCT_CATEGORIES.TOYS, price: 59000, stock: 0, status: PRODUCT_STATUS.SOLD_OUT },
+  { id: 'P098', name: '슬라임 세트', category: PRODUCT_CATEGORIES.TOYS, price: 19000, stock: 60, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P099', name: '미니카 트랙', category: PRODUCT_CATEGORIES.TOYS, price: 75000, stock: 25, status: PRODUCT_STATUS.AVAILABLE },
+  { id: 'P100', name: '인형의 집', category: PRODUCT_CATEGORIES.TOYS, price: 150000, stock: 0, status: PRODUCT_STATUS.SOLD_OUT },
 ].map((p, index) => ({
   ...p,
   createdAt: '',
@@ -272,8 +270,7 @@ for (let i = 0; i < deliveredCount; i++) {
     const randomCustomer = customersForOrders[Math.floor(Math.random() * customersForOrders.length)];
     const randomProduct = products[Math.floor(Math.random() * products.length)];
     const quantity = Math.floor(Math.random() * 3) + 1; // 1~3개
-    const unitPrice = parseAmount(randomProduct.price);
-    const totalAmount = formatAmount(unitPrice * quantity);
+    const totalAmount = randomProduct.price * quantity;
     generatedOrders.push({
         id: '', // Will be assigned later
         orderNo: '', // Will be assigned later
@@ -295,8 +292,7 @@ for (let i = 0; i < shippingCount; i++) {
     const randomCustomer = customersForOrders[Math.floor(Math.random() * customersForOrders.length)];
     const randomProduct = products[Math.floor(Math.random() * products.length)];
     const quantity = Math.floor(Math.random() * 3) + 1; // 1~3개
-    const unitPrice = parseAmount(randomProduct.price);
-    const totalAmount = formatAmount(unitPrice * quantity);
+    const totalAmount = randomProduct.price * quantity;
     generatedOrders.push({
         id: '',
         orderNo: '',
@@ -318,8 +314,7 @@ for (let i = 0; i < preparingCount; i++) {
     const randomCustomer = customersForOrders[Math.floor(Math.random() * customersForOrders.length)];
     const randomProduct = products[Math.floor(Math.random() * products.length)];
     const quantity = Math.floor(Math.random() * 3) + 1; // 1~3개
-    const unitPrice = parseAmount(randomProduct.price);
-    const totalAmount = formatAmount(unitPrice * quantity);
+    const totalAmount = randomProduct.price * quantity;
 
     // 30% 확률로 CS 주문으로 생성
     const isCSOrder = Math.random() < 0.3;
@@ -397,8 +392,7 @@ customers.forEach(customer => {
   // 취소되지 않은 주문만 통계에 포함
   const customerOrders = orders.filter(o => o.customerId === customer.id && o.status !== ORDER_STATUS.CANCELLED);
   customer.totalOrders = customerOrders.length;
-  const totalSpent = customerOrders.reduce((sum, order) => sum + parseAmount(order.amount), 0);
-  customer.totalSpent = formatAmount(totalSpent);
+  customer.totalSpent = customerOrders.reduce((sum, order) => sum + order.amount, 0);
 });
 
 // 4. Generate Reviews from Sanitized Orders
@@ -508,12 +502,7 @@ const parseQueryParams = (request: Request) => {
   return { search, page, limit, sortBy, sortOrder, params: url.searchParams };
 };
 
-const parseAmountValue = (value: any) => {
-  if (typeof value === 'string') {
-    return parseInt(value.replace(/[^0-9]/g, ''), 10) || 0;
-  }
-  return value;
-};
+// Deprecated - 금액 필드는 이제 number 타입
 
 const processData = <T extends Record<string, any>>(
   data: T[],
@@ -547,11 +536,7 @@ const processData = <T extends Record<string, any>>(
       let aVal = a[options.sortBy!];
       let bVal = b[options.sortBy!];
 
-      if (typeof aVal === 'string' && (aVal.includes('원') || options.sortBy === 'price' || options.sortBy === 'totalSpent' || options.sortBy === 'amount')) {
-          aVal = parseAmountValue(aVal);
-          bVal = parseAmountValue(bVal);
-      }
-
+      // 금액 필드는 이제 number 타입이므로 별도 처리 불필요
       if (aVal === bVal) return 0;
       const comparison = aVal > bVal ? 1 : -1;
       return options.sortOrder === 'desc' ? -comparison : comparison;
@@ -1005,8 +990,7 @@ export const handlers = [
     const customerIndex = customers.findIndex(c => c.id === customer!.id);
     const customerOrders = orders.filter(o => o.customerId === customer!.id && o.status !== ORDER_STATUS.CANCELLED);
     customers[customerIndex].totalOrders = customerOrders.length;
-    const totalSpent = customerOrders.reduce((sum, order) => sum + parseAmount(order.amount), 0);
-    customers[customerIndex].totalSpent = formatAmount(totalSpent);
+    customers[customerIndex].totalSpent = customerOrders.reduce((sum, order) => sum + order.amount, 0);
 
     return HttpResponse.json({ success: true, code: API_CODES.CREATED, data: newOrder }, { status: 201 });
   }),
@@ -1053,8 +1037,7 @@ export const handlers = [
         const customerIndex = customers.findIndex(c => c.id === customer.id);
         const customerOrders = orders.filter(o => o.customerId === customer.id && o.status !== ORDER_STATUS.CANCELLED);
         customers[customerIndex].totalOrders = customerOrders.length;
-        const totalSpent = customerOrders.reduce((sum, o) => sum + parseAmount(o.amount), 0);
-        customers[customerIndex].totalSpent = formatAmount(totalSpent);
+        customers[customerIndex].totalSpent = customerOrders.reduce((sum, o) => sum + o.amount, 0);
       }
     }
 
@@ -1096,8 +1079,7 @@ export const handlers = [
       const customerIndex = customers.findIndex(c => c.id === customer.id);
       const customerOrders = orders.filter(o => o.customerId === customer.id && o.status !== ORDER_STATUS.CANCELLED);
       customers[customerIndex].totalOrders = customerOrders.length;
-      const totalSpent = customerOrders.reduce((sum, o) => sum + parseAmount(o.amount), 0);
-      customers[customerIndex].totalSpent = formatAmount(totalSpent);
+      customers[customerIndex].totalSpent = customerOrders.reduce((sum, o) => sum + o.amount, 0);
     }
 
     return orders.length < initialLength ? HttpResponse.json({ success: true, code: API_CODES.OK, message: '주문이 삭제되었습니다.' }, { status: 200 }) : HttpResponse.json({ success: false, code: API_CODES.NOT_FOUND, message: '주문을 찾을 수 없습니다.' }, { status: 404 });
@@ -1165,7 +1147,7 @@ export const handlers = [
     if (!auth.authenticated) return HttpResponse.json({ success: false, code: auth.code!, message: auth.message! }, { status: 401 });
     const customerData = await request.json() as Omit<Customer, 'id'>;
     if (customers.some(c => c.email === customerData.email)) return HttpResponse.json({ success: false, code: API_CODES.DUPLICATE_EMAIL, message: API_MESSAGES[API_CODES.DUPLICATE_EMAIL] }, { status: 400 });
-    const newCustomer: Customer = { ...customerData, id: `C${Date.now()}`, createdAt: formatDate(new Date()), lastLoginAt: formatDate(new Date()), totalOrders: 0, totalSpent: '0원' };
+    const newCustomer: Customer = { ...customerData, id: `C${Date.now()}`, createdAt: formatDate(new Date()), lastLoginAt: formatDate(new Date()), totalOrders: 0, totalSpent: 0 };
     customers.push(newCustomer);
     return HttpResponse.json({ success: true, code: API_CODES.CREATED, data: excludePassword(newCustomer) }, { status: 201 });
   }),
@@ -1261,8 +1243,8 @@ export const handlers = [
       averageRating: reviews.length > 0 ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1) : '0.0',
     };
     const widgets = {
-      totalRevenue: orders.filter(o => o.status !== ORDER_STATUS.CANCELLED).reduce((sum, order) => sum + parseAmount(order.amount), 0),
-      todayRevenue: orders.filter(o => o.date === today && o.status !== ORDER_STATUS.CANCELLED).reduce((sum, order) => sum + parseAmount(order.amount), 0),
+      totalRevenue: orders.filter(o => o.status !== ORDER_STATUS.CANCELLED).reduce((sum, order) => sum + order.amount, 0),
+      todayRevenue: orders.filter(o => o.date === today && o.status !== ORDER_STATUS.CANCELLED).reduce((sum, order) => sum + order.amount, 0),
       preparingOrders: orders.filter(o => o.status === ORDER_STATUS.PREPARING).length,
       shippingOrders: orders.filter(o => o.status === ORDER_STATUS.SHIPPING).length,
       completedOrders: orders.filter(o => o.status === ORDER_STATUS.DELIVERED).length,

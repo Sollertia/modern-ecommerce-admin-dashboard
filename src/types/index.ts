@@ -33,7 +33,7 @@ export interface Customer {
   status: CustomerStatus;
   createdAt: string;
   totalOrders?: number;
-  totalSpent?: string;
+  totalSpent?: number; // 숫자로 저장, 프론트에서 포맷팅
 }
 
 // Product
@@ -51,7 +51,7 @@ export interface Product {
   id: string;
   name: string;
   category: string;
-  price: string;
+  price: number; // 숫자로 저장, 프론트에서 포맷팅
   stock: number;
   status: ProductStatus;
   image?: string;
@@ -73,7 +73,7 @@ export interface Order {
   productId: string;
   product: string;
   quantity: number;
-  amount: string;
+  amount: number; // 숫자로 저장, 프론트에서 포맷팅
   date: string;
   status: OrderStatus;
   cancellationReason?: string;
