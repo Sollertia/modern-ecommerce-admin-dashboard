@@ -399,7 +399,7 @@ export interface DashboardStats {
     totalOrders: number;
     todayOrders: number;
     totalReviews: number;
-    averageRating: string;
+    averageRating: number; // 숫자로 저장, 프론트에서 소수점 표시
   };
   widgets: {
     totalRevenue: number;

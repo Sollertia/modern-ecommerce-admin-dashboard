@@ -1240,7 +1240,7 @@ export const handlers = [
       totalOrders: orders.filter(o => o.status !== ORDER_STATUS.CANCELLED).length,
       todayOrders: orders.filter(o => o.date === today && o.status !== ORDER_STATUS.CANCELLED).length,
       totalReviews: reviews.length,
-      averageRating: reviews.length > 0 ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1) : '0.0',
+      averageRating: reviews.length > 0 ? parseFloat((reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)) : 0,
     };
     const widgets = {
       totalRevenue: orders.filter(o => o.status !== ORDER_STATUS.CANCELLED).reduce((sum, order) => sum + order.amount, 0),
