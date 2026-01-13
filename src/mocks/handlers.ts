@@ -495,8 +495,10 @@ const authenticateRequest = (request: Request) => {
 const parseQueryParams = (request: Request) => {
   const url = new URL(request.url);
   const search = url.searchParams.get('search') || '';
-  const page = parseInt(url.searchParams.get('page') || '1', 10);
-  const limit = parseInt(url.searchParams.get('limit') || '10', 10);
+  const pageStr = url.searchParams.get('page');
+  const limitStr = url.searchParams.get('limit');
+  const page = pageStr ? parseInt(pageStr, 10) : undefined;
+  const limit = limitStr ? parseInt(limitStr, 10) : undefined;
   const sortBy = url.searchParams.get('sortBy') || '';
   const sortOrder = (url.searchParams.get('sortOrder') || 'asc') as 'asc' | 'desc';
   return { search, page, limit, sortBy, sortOrder, params: url.searchParams };
@@ -543,8 +545,14 @@ const processData = <T extends Record<string, any>>(
     });
   }
   const total = result.length;
+  
+  // limit이 undefined이면 전체 데이터 반환
+  if (options.limit === undefined) {
+    return { items: result, pagination: { page: 1, limit: total, total, totalPages: 1 } };
+  }
+
   const page = options.page || 1;
-  const limit = options.limit || 10;
+  const limit = options.limit;
   const totalPages = Math.ceil(total / limit);
   const startIndex = (page - 1) * limit;
   const paginatedData = result.slice(startIndex, startIndex + limit);
@@ -625,6 +633,10 @@ export const handlers = [
     const result = processData(users, { search, searchFields: ['name', 'email', 'phone'], page, limit, sortBy, sortOrder, filters });
     // 패스워드 제외
     const sanitizedData = excludePasswordFromArray(result.items);
+    
+    if (limit === undefined) {
+       return HttpResponse.json({ success: true, code: API_CODES.OK, data: sanitizedData });
+    }
     return HttpResponse.json({ success: true, code: API_CODES.OK, data: { items: sanitizedData, pagination: result.pagination } });
   }),
 
@@ -731,6 +743,10 @@ export const handlers = [
     const { search, page, limit, sortBy, sortOrder, params } = parseQueryParams(request);
     const filters = { category: params.get('category') || '', status: params.get('status') || '' };
     const result = processData(products, { search, searchFields: ['name', 'category'], page, limit, sortBy, sortOrder, filters });
+    
+    if (limit === undefined) {
+       return HttpResponse.json({ success: true, code: API_CODES.OK, data: result.items });
+    }
     return HttpResponse.json({ success: true, code: API_CODES.OK, data: { items: result.items, pagination: result.pagination } });
   }),
 
@@ -870,6 +886,10 @@ export const handlers = [
     const { search, page, limit, sortBy, sortOrder, params } = parseQueryParams(request);
     const filters = { status: params.get('status') || '' };
     const result = processData(orders, { search, searchFields: ['orderNo', 'customer', 'product'], page, limit, sortBy, sortOrder, filters });
+    
+    if (limit === undefined) {
+       return HttpResponse.json({ success: true, code: API_CODES.OK, data: result.items });
+    }
     return HttpResponse.json({ success: true, code: API_CODES.OK, data: { items: result.items, pagination: result.pagination } });
   }),
 
@@ -1095,6 +1115,10 @@ export const handlers = [
       customerId: params.get('customerId') || ''
     };
     const result = processData(reviews, { search, searchFields: ['customer', 'product', 'comment'], page, limit, sortBy, sortOrder, filters });
+    
+    if (limit === undefined) {
+       return HttpResponse.json({ success: true, code: API_CODES.OK, data: result.items });
+    }
     return HttpResponse.json({ success: true, code: API_CODES.OK, data: { items: result.items, pagination: result.pagination } });
   }),
 
@@ -1131,6 +1155,10 @@ export const handlers = [
     const result = processData(customers, { search, searchFields: ['name', 'email', 'phone'], page, limit, sortBy, sortOrder, filters });
     // 패스워드 제외
     const sanitizedData = excludePasswordFromArray(result.items);
+    
+    if (limit === undefined) {
+       return HttpResponse.json({ success: true, code: API_CODES.OK, data: sanitizedData });
+    }
     return HttpResponse.json({ success: true, code: API_CODES.OK, data: { items: sanitizedData, pagination: result.pagination } });
   }),
 

@@ -58,6 +58,8 @@ export const Orders: React.FC = () => {
   const fetchOrders = useDataStore((state) => state.fetchOrders);
   const fetchProducts = useDataStore((state) => state.fetchProducts);
   const fetchCustomers = useDataStore((state) => state.fetchCustomers);
+  const fetchAllProducts = useDataStore((state) => state.fetchAllProducts);
+  const fetchAllCustomers = useDataStore((state) => state.fetchAllCustomers);
   const updateOrderStatus = useDataStore((state) => state.updateOrderStatus);
   const deleteOrder = useDataStore((state) => state.deleteOrder);
   const addOrder = useDataStore((state) => state.addOrder);
@@ -260,9 +262,11 @@ export const Orders: React.FC = () => {
       toast.error('주문 생성 권한이 없습니다.');
       return;
     }
-    // 주문 생성 시 전체 상품 및 고객 목록 조회 (페이징 없이)
-    fetchProducts({ limit: 20 });
-    fetchCustomers({ limit: 10 });
+    
+    // 주문 생성 시 전체 데이터 로드 (limit 파라미터 없이 요청하여 전체 조회 유도)
+    fetchAllProducts();
+    fetchAllCustomers();
+
     setCreateFormData({
       customerId: '',
       customer: '',

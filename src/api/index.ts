@@ -192,6 +192,17 @@ export const customersApi = {
     return handleResponse<PaginatedData<Customer>>(response);
   },
 
+  // 전체 고객 목록 조회 (드롭다운용, 페이징 없음)
+  // 기존 API 엔드포인트(/customers)를 사용하되, 파라미터 없이 호출하면 전체 데이터를 반환하도록 수정됨
+  getAllNoPagination: async (): Promise<Customer[]> => {
+    const response = await apiFetch(`${API_BASE_URL}/customers`);
+    // 응답 구조가 { items: [], pagination: ... } 형태일 수 있으므로 처리 필요
+    // Mock 핸들러 수정으로 limit이 없으면 전체 데이터를 items에 담아 반환하고
+    // pagination 정보도 그에 맞춰서 오므로 items만 추출하면 됨
+    const data = await handleResponse<Customer[]>(response);
+    return data;
+  },
+
   getById: async (id: string): Promise<Customer> => {
     const response = await apiFetch(`${API_BASE_URL}/customers/${id}`);
     return handleResponse<Customer>(response);
@@ -235,6 +246,15 @@ export const productsApi = {
     const queryString = buildQueryString(params);
     const response = await apiFetch(`${API_BASE_URL}/products${queryString}`);
     return handleResponse<PaginatedData<Product>>(response);
+  },
+
+  // 전체 상품 목록 조회 (드롭다운용, 페이징 없음)
+  // 기존 API 엔드포인트(/products)를 사용하되, 파라미터 없이 호출하면 전체 데이터를 반환하도록 수정됨
+  getAllNoPagination: async (): Promise<Product[]> => {
+    const response = await apiFetch(`${API_BASE_URL}/products`);
+    // 응답 구조가 { items: [], pagination: ... } 형태일 수 있으므로 처리 필요
+    const data = await handleResponse<Product[]>(response);
+    return data;
   },
 
   getById: async (id: string): Promise<Product> => {

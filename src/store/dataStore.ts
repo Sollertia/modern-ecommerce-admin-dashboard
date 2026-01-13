@@ -34,6 +34,10 @@ interface DataState {
   fetchProducts: (params?: QueryParams) => Promise<void>;
   fetchOrders: (params?: QueryParams) => Promise<void>;
   fetchReviews: (params?: QueryParams) => Promise<void>;
+  
+  // Fetch All Actions (No Pagination)
+  fetchAllCustomers: () => Promise<void>;
+  fetchAllProducts: () => Promise<void>;
 
   // User Actions
   addUser: (user: Omit<User, 'id'>) => Promise<void>;
@@ -128,6 +132,27 @@ export const useDataStore = create<DataState>((set) => ({
     try {
       const response = await reviewsApi.getAll(params);
       set({ reviews: response.items, reviewsPagination: response.pagination, isLoading: false });
+    } catch (error) {
+      set({ error: (error as Error).message, isLoading: false });
+    }
+  },
+
+  // Fetch All Actions (No Pagination)
+  fetchAllCustomers: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const customers = await customersApi.getAllNoPagination();
+      set({ customers, isLoading: false });
+    } catch (error) {
+      set({ error: (error as Error).message, isLoading: false });
+    }
+  },
+
+  fetchAllProducts: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const products = await productsApi.getAllNoPagination();
+      set({ products, isLoading: false });
     } catch (error) {
       set({ error: (error as Error).message, isLoading: false });
     }
