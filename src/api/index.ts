@@ -23,11 +23,16 @@ class ApiError extends Error {
 }
 
 /**
- * Authorization 헤더를 포함한 fetch 헤더 생성
+ * Authorization 헤더와 캐시 제어 헤더를 포함한 fetch 헤더 생성
  */
 function getAuthHeaders(includeContentType = false): HeadersInit {
   const token = useAuthStore.getState().token;
-  const headers: HeadersInit = {};
+  const headers: HeadersInit = {
+    // 강력한 캐시 방지 헤더
+    'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
+    'Pragma': 'no-cache',
+    'Expires': '0',
+  };
 
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
@@ -41,32 +46,26 @@ function getAuthHeaders(includeContentType = false): HeadersInit {
 }
 
 /**
- * 기본 fetch 옵션 생성 (캐시 제어 포함)
- */
-function getFetchOptions(method: string = 'GET', includeContentType = false): RequestInit {
-  return {
-    method,
-    headers: getAuthHeaders(includeContentType),
-    cache: 'no-store', // 브라우저 캐싱 방지
-  };
-}
-
-/**
  * 쿼리 파라미터를 URL에 추가하는 헬퍼 함수
+ * 캐시 방지를 위한 타임스탬프도 추가
  */
 function buildQueryString(params?: QueryParams): string {
-  if (!params) return '';
-
   const searchParams = new URLSearchParams();
 
-  Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined && value !== '') {
-      searchParams.append(key, String(value));
-    }
-  });
+  // 기존 파라미터 추가
+  if (params) {
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== '') {
+        searchParams.append(key, String(value));
+      }
+    });
+  }
+
+  // 캐시 방지를 위한 타임스탬프 추가
+  searchParams.append('_t', Date.now().toString());
 
   const queryString = searchParams.toString();
-  return queryString ? `?${queryString}` : '';
+  return queryString ? `?${queryString}` : `?_t=${Date.now()}`;
 }
 
 /**
